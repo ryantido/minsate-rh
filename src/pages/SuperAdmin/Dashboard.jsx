@@ -18,7 +18,8 @@ import {
   XCircle,
   FileText,
   Database,
-  Wrench
+  Wrench,
+  TargetIcon
 } from "lucide-react";
 import { motion } from 'framer-motion';
 import api from "../../services/api";
@@ -123,20 +124,38 @@ const SuperAdminDashboard = () => {
       available: true
     },
     {
-      id: 'rapports',
-      title: 'Rapports et Statistiques',
-      description: 'Consulter les rapports détaillés et les statistiques du système',
-      icon: TrendingUp,
+      id: 'Presences et absences',
+      title: 'Presences et Absences',
+      description: 'Consulter l\'historiques des absences et des presence des employes',
+      icon: Calendar,
+      color: 'green',
+      link: '#',
+      available: false
+    },
+    {
+      id: 'formtions',
+      title: 'Gestion des formations',
+      description: 'Planifier et Consulter la liste des formations disponibles et assignées y des employes si necessaire',
+      icon: TargetIcon,
       color: 'pink',
       link: '#',
       available: false
     },
     {
-      id: 'parametres',
-      title: 'Paramètres Système',
-      description: 'Configurer les paramètres généraux du système',
-      icon: Settings,
+      id: 'evaluation',
+      title: 'Evaluation des employes',
+      description: 'Evaluer la performance des employes et leurs attribuées une note',
+      icon: FileText,
       color: 'gray',
+      link: '#',
+      available: false
+    },
+    {
+      id: 'contrat',
+      title: 'Gestion des contrat',
+      description: 'Gestion des contrat des employes (Permanant, Temporaire, etc...)',
+      icon: FileText,
+      color: 'pink',
       link: '#',
       available: false
     }
