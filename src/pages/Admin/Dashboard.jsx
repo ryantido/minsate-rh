@@ -1,17 +1,19 @@
 import React, { useState, useEffect } from "react";
-import { useAuth } from "../../contexts/AuthContext";
-import { 
-  LogOut, 
-  Users, 
-  BarChart3, 
-  FileText, 
+import {
+  LogOut,
+  Users,
+  BarChart3,
+  FileText,
   Calendar,
   Settings,
   UserCheck,
   TrendingUp,
-  Bell
+  Bell,
 } from "lucide-react";
-import api from "../../services/api";
+import { useAuth } from "@/hooks";
+import api from "@/services/api";
+import { AdminDashboardMenu } from "@/constants";
+import { cn } from "@/lib/utils";
 
 const AdminDashboard = () => {
   const { user, logout } = useAuth();
@@ -51,7 +53,7 @@ const AdminDashboard = () => {
                 </h1>
               </div>
             </div>
-            
+
             <div className="flex items-center space-x-4">
               <div className="text-right">
                 <p className="text-sm font-medium text-gray-900 dark:text-white">
@@ -92,21 +94,16 @@ const AdminDashboard = () => {
                 </div>
 
                 <nav className="space-y-2">
-                  {[
-                    { id: "dashboard", name: "Tableau de bord", icon: BarChart3 },
-                    { id: "employees", name: "Gestion Employés", icon: Users },
-                    { id: "leaves", name: "Gestion Congés", icon: Calendar },
-                    { id: "reports", name: "Rapports", icon: FileText },
-                    { id: "settings", name: "Paramètres", icon: Settings },
-                  ].map((item) => (
+                  {AdminDashboardMenu.map((item) => (
                     <button
                       key={item.id}
                       onClick={() => setActiveTab(item.id)}
-                      className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                      className={cn(
+                        "w-full flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors",
                         activeTab === item.id
                           ? "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300"
                           : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700"
-                      }`}
+                      )}
                     >
                       <item.icon className="h-4 w-4 mr-3" />
                       {item.name}
@@ -189,21 +186,29 @@ const AdminDashboard = () => {
                   </h4>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">Email</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        Email
+                      </p>
                       <p className="text-sm font-medium text-gray-900 dark:text-white">
                         {user?.email}
                       </p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">Rôle</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        Rôle
+                      </p>
                       <p className="text-sm font-medium text-gray-900 dark:text-white">
                         Administrateur RH
                       </p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">Date de création</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        Date de création
+                      </p>
                       <p className="text-sm font-medium text-gray-900 dark:text-white">
-                        {user?.created_at ? new Date(user.created_at).toLocaleDateString() : "Non spécifiée"}
+                        {user?.created_at
+                          ? new Date(user.created_at).toLocaleDateString()
+                          : "Non spécifiée"}
                       </p>
                     </div>
                   </div>

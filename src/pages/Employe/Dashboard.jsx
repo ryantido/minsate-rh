@@ -1,18 +1,18 @@
 import React, { useState, useEffect } from "react";
-import { useAuth } from "../../contexts/AuthContext";
-import { 
-  LogOut, 
-  User, 
-  Calendar, 
-  FileText, 
-  Bell, 
-  MessageCircle,
-  BarChart3,
+import {
+  LogOut,
+  User,
+  Calendar,
+  FileText,
+  Bell,
+  MessageCircle,  
   Clock,
-  Award,
-  Settings
+  Award,  
 } from "lucide-react";
-import api from "../../services/api";
+import { useAuth } from "@/hooks";
+import api from "@/services/api";
+import { EmployeeDashboardMenu } from "@/constants";
+import { cn } from "@/lib/utils";
 
 const EmployeeDashboard = () => {
   const { user, logout } = useAuth();
@@ -44,7 +44,9 @@ const EmployeeDashboard = () => {
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto"></div>
-          <p className="mt-4 text-gray-600 dark:text-gray-400">Chargement du profil...</p>
+          <p className="mt-4 text-gray-600 dark:text-gray-400">
+            Chargement du profil...
+          </p>
         </div>
       </div>
     );
@@ -66,7 +68,7 @@ const EmployeeDashboard = () => {
                 </h1>
               </div>
             </div>
-            
+
             <div className="flex items-center space-x-4">
               <div className="text-right">
                 <p className="text-sm font-medium text-gray-900 dark:text-white">
@@ -110,23 +112,16 @@ const EmployeeDashboard = () => {
                 </div>
 
                 <nav className="space-y-2">
-                  {[
-                    { id: "dashboard", name: "Tableau de bord", icon: BarChart3 },
-                    { id: "profile", name: "Mon Profil", icon: User },
-                    { id: "leaves", name: "Mes Congés", icon: Calendar },
-                    { id: "documents", name: "Documents", icon: FileText },
-                    { id: "notifications", name: "Notifications", icon: Bell },
-                    { id: "chatbot", name: "Assistant RH", icon: MessageCircle },
-                    { id: "settings", name: "Paramètres", icon: Settings },
-                  ].map((item) => (
+                  {EmployeeDashboardMenu.map((item) => (
                     <button
                       key={item.id}
                       onClick={() => setActiveTab(item.id)}
-                      className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                      className={cn(
+                        "w-full flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors",
                         activeTab === item.id
                           ? "bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300"
                           : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700"
-                      }`}
+                      )}
                     >
                       <item.icon className="h-4 w-4 mr-3" />
                       {item.name}
@@ -195,25 +190,35 @@ const EmployeeDashboard = () => {
                   </h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">Email</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        Email
+                      </p>
                       <p className="text-sm font-medium text-gray-900 dark:text-white">
                         {user?.email}
                       </p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">Date d'embauche</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        Date d'embauche
+                      </p>
                       <p className="text-sm font-medium text-gray-900 dark:text-white">
-                        {profile?.date_embauche ? new Date(profile.date_embauche).toLocaleDateString() : "Non spécifiée"}
+                        {profile?.date_embauche
+                          ? new Date(profile.date_embauche).toLocaleDateString()
+                          : "Non spécifiée"}
                       </p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">Statut</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        Statut
+                      </p>
                       <p className="text-sm font-medium text-gray-900 dark:text-white capitalize">
                         {profile?.statut || "Actif"}
                       </p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">Poste</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        Poste
+                      </p>
                       <p className="text-sm font-medium text-gray-900 dark:text-white">
                         {profile?.poste_details?.titre || "Non spécifié"}
                       </p>
