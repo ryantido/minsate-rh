@@ -1,7 +1,6 @@
 // SuperAdminNavbar.jsx
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "../../contexts/AuthContext";
 import {
   Menu,
   Sun,
@@ -13,39 +12,19 @@ import {
   LogOut,
   Bell,
   CheckCircle,
-  Building
 } from "lucide-react";
-import NotificationDropdown from "../../components/NotificationDropdown";
+import { useAuth } from "@/hooks";
+import { cn } from "@/lib/utils";
 
-export default function SuperAdminNavbar({ toggleSidebar, sidebarVisible, isMobile }) {
+export default function SuperAdminNavbar({
+  toggleSidebar,
+  sidebarVisible,
+  isMobile,
+  toggleTheme,
+  theme,
+}) {
   const { logout, user } = useAuth();
   const navigate = useNavigate();
-  const [theme, setTheme] = useState("dark");
-
-  useEffect(() => {
-    const currentTheme = document.documentElement.classList.contains("dark") ? "dark" : "light";
-    setTheme(currentTheme);
-
-    const observer = new MutationObserver(() => {
-      const newTheme = document.documentElement.classList.contains("dark") ? "dark" : "light";
-      setTheme(newTheme);
-    });
-
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ["class"],
-    });
-
-    return () => observer.disconnect();
-  }, []);
-
-  const toggleTheme = () => {
-    const html = document.documentElement;
-    const newTheme = html.classList.contains("dark") ? "light" : "dark";
-    html.classList.toggle("dark");
-    localStorage.setItem("theme", newTheme);
-    setTheme(newTheme);
-  };
 
   const handleLogout = () => {
     logout();
@@ -54,28 +33,37 @@ export default function SuperAdminNavbar({ toggleSidebar, sidebarVisible, isMobi
 
   const getInitials = (name) => {
     if (!name) return "SA";
-    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
   };
 
   const truncateName = (name, maxLength = 15) => {
     if (!name) return "";
-    return name.length > maxLength ? name.slice(0, maxLength - 3) + "..." : name;
+    return name.length > maxLength
+      ? name.slice(0, maxLength - 3) + "..."
+      : name;
   };
 
   const handleToggleSidebar = (e) => {
     e.preventDefault();
     e.stopPropagation();
     console.log("Toggle button clicked, isMobile:", isMobile);
-    if (typeof toggleSidebar === 'function') {
+    if (typeof toggleSidebar === "function") {
       toggleSidebar();
     }
   };
 
   return (
-    <nav className={`
-      fixed top-0 h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm z-40 transition-all duration-300
-      ${sidebarVisible && !isMobile ? 'lg:left-64 lg:right-0' : 'left-0 right-0'}
-    `}>
+    <nav
+      className={cn(
+        "fixed top-0 h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm z-40 transition-all duration-300",
+        sidebarVisible && !isMobile ? "lg:left-64 lg:right-0" : "left-0 right-0"
+      )}
+    >
       <div className="flex items-center justify-between h-full px-4 lg:px-6">
         {/* Partie gauche - Bouton toggle et titre */}
         <div className="flex items-center space-x-4">
@@ -92,7 +80,9 @@ export default function SuperAdminNavbar({ toggleSidebar, sidebarVisible, isMobi
               <h1 className="text-xl font-bold bg-gradient-to-r from-green-600 to-green-700 bg-clip-text text-transparent">
                 {sidebarVisible ? "Tableau de bord" : "MINSANTE RH"}
               </h1>
-              <p className="text-xs text-gray-500 dark:text-gray-400">Super Administration</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Super Administration
+              </p>
             </div>
           </div>
         </div>
@@ -134,7 +124,7 @@ export default function SuperAdminNavbar({ toggleSidebar, sidebarVisible, isMobi
                     alt={user.name || "Super Admin"}
                     className="w-full h-full rounded-full object-cover"
                     onError={(e) => {
-                      e.target.style.display = 'none';
+                      e.target.style.display = "none";
                     }}
                   />
                 ) : null}

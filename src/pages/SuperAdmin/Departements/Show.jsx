@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
-import SuperAdminLayout from "../../../layouts/SuperAdmin/Layout";
+import SuperAdminLayout from "@/layouts/SuperAdmin/Layout";
 import {
   ArrowLeft,
   Edit,
   Trash2,
-  FolderTree,
   AlertCircle,
   CheckCircle,
   Building2,
@@ -15,11 +14,11 @@ import {
   Clock,
   Mail,
   Settings,
-  Key
+  Key,
 } from "lucide-react";
-import { motion, AnimatePresence } from 'framer-motion';
-import api from "../../../services/api";
-import Toast from "../../../components/ui/Toast";
+import { motion, AnimatePresence } from "motion/react";
+import api from "@/services/api";
+import { cn } from "@/lib/utils";
 
 export default function DepartementShow() {
   const { id } = useParams();
@@ -41,14 +40,14 @@ export default function DepartementShow() {
       const response = await api.get(`/users/departements/${id}/`);
       setDepartement(response.data);
     } catch (error) {
-      console.error('Erreur lors du chargement du département:', error);
-      showToastMessage('Erreur lors du chargement du département', 'error');
+      console.error("Erreur lors du chargement du département:", error);
+      showToastMessage("Erreur lors du chargement du département", error);
     } finally {
       setLoading(false);
     }
   };
 
-  const showToastMessage = (message, type = 'success') => {
+  const showToastMessage = (message, type = "success") => {
     setToastMessage(message);
     setToastType(type);
     setShowToast(true);
@@ -58,32 +57,35 @@ export default function DepartementShow() {
   const handleDelete = async () => {
     try {
       await api.delete(`/users/departements/${id}/`);
-      showToastMessage('Département supprimé avec succès', 'success');
+      showToastMessage("Département supprimé avec succès", "success");
       setTimeout(() => {
-        navigate('/superadmin/departements');
+        navigate("/superadmin/departements");
       }, 2000);
     } catch (error) {
-      console.error('Erreur lors de la suppression:', error);
-      const errorMsg = error.response?.data?.message || error.response?.data?.error || 'Erreur lors de la suppression';
-      showToastMessage(errorMsg, 'error');
+      console.error("Erreur lors de la suppression:", error);
+      const errorMsg =
+        error.response?.data?.message ||
+        error.response?.data?.error ||
+        "Erreur lors de la suppression";
+      showToastMessage(errorMsg, error);
     } finally {
       setShowDeleteModal(false);
     }
   };
 
   const formatDate = (dateString) => {
-    if (!dateString) return 'Non renseigné';
-    return new Date(dateString).toLocaleDateString('fr-FR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+    if (!dateString) return "Non renseigné";
+    return new Date(dateString).toLocaleDateString("fr-FR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
   const getInitials = (name) => {
-    if (!name) return 'D';
+    if (!name) return "D";
     return name.charAt(0).toUpperCase();
   };
 
@@ -93,7 +95,9 @@ export default function DepartementShow() {
         <div className="flex items-center justify-center min-h-96">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#179150] mx-auto mb-4"></div>
-            <p className="text-gray-600 dark:text-gray-400">Chargement du département...</p>
+            <p className="text-gray-600 dark:text-gray-400">
+              Chargement du département...
+            </p>
           </div>
         </div>
       </SuperAdminLayout>
@@ -182,12 +186,13 @@ export default function DepartementShow() {
                       <div
                         className="rounded-lg border-4 border-[#179150] flex items-center justify-center"
                         style={{
-                          width: '120px',
-                          height: '120px',
-                          background: 'linear-gradient(135deg, #179150 0%, #147a43 100%)',
-                          color: 'white',
-                          fontSize: '3rem',
-                          fontWeight: '700'
+                          width: "120px",
+                          height: "120px",
+                          background:
+                            "linear-gradient(135deg, #179150 0%, #147a43 100%)",
+                          color: "white",
+                          fontSize: "3rem",
+                          fontWeight: "700",
                         }}
                       >
                         {getInitials(departement.nom)}
@@ -198,9 +203,13 @@ export default function DepartementShow() {
                     </div>
                   </div>
                   <div className="md:w-3/4 md:pl-8">
-                    <h4 className="mb-2 text-2xl font-bold text-gray-900 dark:text-white">{departement.nom}</h4>
+                    <h4 className="mb-2 text-2xl font-bold text-gray-900 dark:text-white">
+                      {departement.nom}
+                    </h4>
                     <div className="flex flex-wrap gap-2 items-center">
-                      <span className="px-3 py-1 bg-[#179150] text-white text-sm font-medium rounded">Département</span>
+                      <span className="px-3 py-1 bg-[#179150] text-white text-sm font-medium rounded">
+                        Département
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -215,25 +224,39 @@ export default function DepartementShow() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-3">
                       <div className="flex justify-between items-center py-3 border-b border-gray-200 dark:border-gray-700">
-                        <span className="text-gray-600 dark:text-gray-400">Nom :</span>
-                        <span className="font-medium text-gray-900 dark:text-white">{departement.nom}</span>
+                        <span className="text-gray-600 dark:text-gray-400">
+                          Nom :
+                        </span>
+                        <span className="font-medium text-gray-900 dark:text-white">
+                          {departement.nom}
+                        </span>
                       </div>
                       <div className="flex justify-between items-start py-3 border-b border-gray-200 dark:border-gray-700">
-                        <span className="text-gray-600 dark:text-gray-400">Description :</span>
+                        <span className="text-gray-600 dark:text-gray-400">
+                          Description :
+                        </span>
                         <span className="font-medium text-gray-900 dark:text-white text-right max-w-xs">
-                          {departement.description || 'Aucune description'}
+                          {departement.description || "Aucune description"}
                         </span>
                       </div>
                     </div>
 
                     <div className="space-y-3">
                       <div className="flex justify-between items-center py-3 border-b border-gray-200 dark:border-gray-700">
-                        <span className="text-gray-600 dark:text-gray-400">Créé le :</span>
-                        <span className="font-medium text-gray-900 dark:text-white">{formatDate(departement.created_at)}</span>
+                        <span className="text-gray-600 dark:text-gray-400">
+                          Créé le :
+                        </span>
+                        <span className="font-medium text-gray-900 dark:text-white">
+                          {formatDate(departement.created_at)}
+                        </span>
                       </div>
                       <div className="flex justify-between items-center py-3 border-b border-gray-200 dark:border-gray-700">
-                        <span className="text-gray-600 dark:text-gray-400">Modifié le :</span>
-                        <span className="font-medium text-gray-900 dark:text-white">{formatDate(departement.updated_at)}</span>
+                        <span className="text-gray-600 dark:text-gray-400">
+                          Modifié le :
+                        </span>
+                        <span className="font-medium text-gray-900 dark:text-white">
+                          {formatDate(departement.updated_at)}
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -257,7 +280,7 @@ export default function DepartementShow() {
 
                   <div className="flex items-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
                     <div className="w-16 h-16 bg-gradient-to-br from-[#179150] to-[#147a43] flex items-center justify-center text-white font-bold text-lg mr-4 rounded-lg">
-                      {departement.chef_info.name?.charAt(0) || 'C'}
+                      {departement.chef_info.name?.charAt(0) || "C"}
                     </div>
                     <div>
                       <h6 className="font-semibold text-gray-900 dark:text-white">
@@ -296,7 +319,9 @@ export default function DepartementShow() {
               className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm"
             >
               <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-                <h4 className="text-sm font-semibold text-gray-900 dark:text-white">Actions rapides</h4>
+                <h4 className="text-sm font-semibold text-gray-900 dark:text-white">
+                  Actions rapides
+                </h4>
               </div>
               <div className="p-4 space-y-2">
                 <Link
@@ -340,30 +365,44 @@ export default function DepartementShow() {
                 <div className="flex items-start">
                   <Key className="w-4 h-4 text-gray-600 mr-2 mt-1" />
                   <div>
-                    <div className="font-medium text-gray-900 dark:text-white">ID Département</div>
-                    <div className="text-gray-600 dark:text-gray-400 font-mono">{departement.id}</div>
+                    <div className="font-medium text-gray-900 dark:text-white">
+                      ID Département
+                    </div>
+                    <div className="text-gray-600 dark:text-gray-400 font-mono">
+                      {departement.id}
+                    </div>
                   </div>
                 </div>
                 <div className="flex items-start">
                   <Calendar className="w-4 h-4 text-gray-600 mr-2 mt-1" />
                   <div>
-                    <div className="font-medium text-gray-900 dark:text-white">Date de création</div>
-                    <div className="text-gray-600 dark:text-gray-400">{formatDate(departement.created_at)}</div>
+                    <div className="font-medium text-gray-900 dark:text-white">
+                      Date de création
+                    </div>
+                    <div className="text-gray-600 dark:text-gray-400">
+                      {formatDate(departement.created_at)}
+                    </div>
                   </div>
                 </div>
                 <div className="flex items-start">
                   <Clock className="w-4 h-4 text-gray-600 mr-2 mt-1" />
                   <div>
-                    <div className="font-medium text-gray-900 dark:text-white">Dernière modification</div>
-                    <div className="text-gray-600 dark:text-gray-400">{formatDate(departement.updated_at)}</div>
+                    <div className="font-medium text-gray-900 dark:text-white">
+                      Dernière modification
+                    </div>
+                    <div className="text-gray-600 dark:text-gray-400">
+                      {formatDate(departement.updated_at)}
+                    </div>
                   </div>
                 </div>
                 <div className="flex items-start">
                   <User className="w-4 h-4 text-gray-600 mr-2 mt-1" />
                   <div>
-                    <div className="font-medium text-gray-900 dark:text-white">Chef assigné</div>
+                    <div className="font-medium text-gray-900 dark:text-white">
+                      Chef assigné
+                    </div>
                     <div className="text-gray-600 dark:text-gray-400">
-                      {departement.chef_info ? 'Oui' : 'Non'}
+                      {departement.chef_info ? "Oui" : "Non"}
                     </div>
                   </div>
                 </div>
@@ -373,12 +412,30 @@ export default function DepartementShow() {
         </div>
       </div>
 
-      <Toast
-        message={toastMessage}
-        type={toastType}
-        isVisible={showToast}
-        onClose={() => setShowToast(false)}
-      />
+      {/* Toast Notification */}
+      <AnimatePresence>
+        {showToast && (
+          <motion.div
+            initial={{ opacity: 0, y: 50, x: "-50%" }}
+            animate={{ opacity: 1, y: 0, x: "-50%" }}
+            exit={{ opacity: 0, y: 50, x: "-50%" }}
+            className={cn(
+              "fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 px-6 py-4 rounded-lg shadow-lg flex items-center gap-3",
+              {
+                "bg-green-500 text-white": toastType === "success",
+                "bg-red-500 text-white": toastType === "error",
+              }
+            )}
+          >
+            {toastType === "success" ? (
+              <CheckCircle className="w-5 h-5" />
+            ) : (
+              <AlertCircle className="w-5 h-5" />
+            )}
+            <span>{toastMessage}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Modal de suppression */}
       <AnimatePresence>
@@ -408,8 +465,9 @@ export default function DepartementShow() {
                 </div>
               </div>
               <p className="text-gray-600 dark:text-gray-400 mb-6">
-                Êtes-vous sûr de vouloir supprimer le département <strong>{departement.nom}</strong> ?
-                Cette action est irréversible.
+                Êtes-vous sûr de vouloir supprimer le département{" "}
+                <strong>{departement.nom}</strong> ? Cette action est
+                irréversible.
               </p>
               <div className="flex justify-end gap-3">
                 <button
@@ -432,4 +490,3 @@ export default function DepartementShow() {
     </SuperAdminLayout>
   );
 }
-

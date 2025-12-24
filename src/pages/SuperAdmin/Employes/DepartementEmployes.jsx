@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
-import SuperAdminLayout from "../../../layouts/SuperAdmin/Layout";
+import SuperAdminLayout from "@/layouts/SuperAdmin/Layout";
 import {
   Users,
   Plus,
@@ -14,19 +14,17 @@ import {
   Calendar,
   X,
   XCircle,
-  Clock,
   Building2,
   Briefcase,
   CheckCircle,
-  User,
   Mail,
   Phone,
   ArrowLeft,
-  Filter
+  Filter,
 } from "lucide-react";
-import { motion, AnimatePresence } from 'framer-motion';
-import api from "../../../services/api";
-import Toast from "../../../components/ui/Toast";
+import { motion, AnimatePresence } from "motion/react";
+import api from "@/services/api";
+import { badges } from "@/constants";
 
 export default function DepartementEmployes() {
   const { id } = useParams();
@@ -45,7 +43,7 @@ export default function DepartementEmployes() {
   const [stats, setStats] = useState({
     total: 0,
     actifs: 0,
-    inactifs: 0
+    inactifs: 0,
   });
 
   useEffect(() => {
@@ -62,25 +60,25 @@ export default function DepartementEmployes() {
       const response = await api.get(`/users/departements/${id}/`);
       setDepartement(response.data);
     } catch (error) {
-      console.error('Erreur lors du chargement du département:', error);
-      showToastMessage('Erreur lors du chargement du département', 'error');
+      console.error("Erreur lors du chargement du département:", error);
+      showToastMessage("Erreur lors du chargement du département", error);
     }
   };
 
   const fetchEmployes = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/users/employe-profiles/');
+      const response = await api.get("/users/employe-profiles/");
       const allEmployes = response.data || [];
       // Filtrer les employés du département
-      const deptEmployes = allEmployes.filter(emp =>
-        emp.poste_details?.departement?.toString() === id
+      const deptEmployes = allEmployes.filter(
+        (emp) => emp.poste_details?.departement?.toString() === id
       );
       setEmployes(deptEmployes);
       calculateStats(deptEmployes);
     } catch (error) {
-      console.error('Erreur lors du chargement:', error);
-      showToastMessage('Erreur lors du chargement des employés', 'error');
+      console.error("Erreur lors du chargement:", error);
+      showToastMessage("Erreur lors du chargement des employés", error);
     } finally {
       setLoading(false);
     }
@@ -88,25 +86,27 @@ export default function DepartementEmployes() {
 
   const calculateStats = (data) => {
     const total = data.length;
-    const actifs = data.filter(emp => emp.statut === 'actif').length;
+    const actifs = data.filter((emp) => emp.statut === "actif").length;
     const inactifs = total - actifs;
 
     setStats({ total, actifs, inactifs });
   };
 
-  const showToastMessage = (message, type = 'success') => {
+  const showToastMessage = (message, type = "success") => {
     setToastMessage(message);
     setToastType(type);
     setShowToast(true);
   };
 
-  const filteredEmployes = employes.filter(emp => {
+  const filteredEmployes = employes.filter((emp) => {
     const matchesSearch =
       emp.user?.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       emp.user?.last_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       emp.user?.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       emp.matricule?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      emp.poste_details?.titre?.toLowerCase().includes(searchTerm.toLowerCase());
+      emp.poste_details?.titre
+        ?.toLowerCase()
+        .includes(searchTerm.toLowerCase());
 
     const matchesStatut = !statutFilter || emp.statut === statutFilter;
 
@@ -116,15 +116,15 @@ export default function DepartementEmployes() {
   const groupEmployesByPoste = () => {
     const grouped = {};
 
-    filteredEmployes.forEach(emp => {
-      const posteId = emp.poste?.toString() || 'sans-poste';
-      const posteTitre = emp.poste_details?.titre || 'Sans poste';
+    filteredEmployes.forEach((emp) => {
+      const posteId = emp.poste?.toString() || "sans-poste";
+      const posteTitre = emp.poste_details?.titre || "Sans poste";
 
       if (!grouped[posteId]) {
         grouped[posteId] = {
           titre: posteTitre,
           id: posteId,
-          employes: []
+          employes: [],
         };
       }
 
@@ -144,12 +144,15 @@ export default function DepartementEmployes() {
 
     try {
       await api.delete(`/users/employe-profiles/${employeToDelete.id}/`);
-      showToastMessage('Employé supprimé avec succès', 'success');
+      showToastMessage("Employé supprimé avec succès", "success");
       fetchEmployes();
     } catch (error) {
-      console.error('Erreur lors de la suppression:', error);
-      const errorMsg = error.response?.data?.message || error.response?.data?.error || 'Erreur lors de la suppression';
-      showToastMessage(errorMsg, 'error');
+      console.error("Erreur lors de la suppression:", error);
+      const errorMsg =
+        error.response?.data?.message ||
+        error.response?.data?.error ||
+        "Erreur lors de la suppression";
+      showToastMessage(errorMsg, error);
     } finally {
       setShowDeleteModal(false);
       setEmployeToDelete(null);
@@ -157,53 +160,59 @@ export default function DepartementEmployes() {
   };
 
   const formatDate = (dateString) => {
-    if (!dateString) return 'Non renseigné';
-    return new Date(dateString).toLocaleDateString('fr-FR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
+    if (!dateString) return "Non renseigné";
+    return new Date(dateString).toLocaleDateString("fr-FR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
     });
   };
 
   const getStatutBadge = (statut) => {
-    const badges = {
-      'actif': { bg: 'bg-green-100 dark:bg-green-900/30', text: 'text-green-800 dark:text-green-400', label: 'Actif' },
-      'inactif': { bg: 'bg-gray-100 dark:bg-gray-700', text: 'text-gray-800 dark:text-gray-300', label: 'Inactif' },
-      'suspendu': { bg: 'bg-orange-100 dark:bg-orange-900/30', text: 'text-orange-800 dark:text-orange-400', label: 'Suspendu' },
-      'congé': { bg: 'bg-blue-100 dark:bg-blue-900/30', text: 'text-blue-800 dark:text-blue-400', label: 'En congé' }
-    };
-    return badges[statut] || badges['inactif'];
+    return badges[statut] || badges["inactif"];
   };
 
   const getInitials = (firstName, lastName) => {
-    return `${firstName?.charAt(0) || ''}${lastName?.charAt(0) || ''}`.toUpperCase();
+    return `${firstName?.charAt(0) || ""}${
+      lastName?.charAt(0) || ""
+    }`.toUpperCase();
   };
 
   const exportToCSV = () => {
-    const headers = ['Matricule', 'Nom', 'Prénom', 'Email', 'Poste', 'Statut', 'Date embauche'];
-    const csvData = filteredEmployes.map(emp => [
-      emp.matricule || '',
-      emp.user?.last_name || '',
-      emp.user?.first_name || '',
-      emp.user?.email || '',
-      emp.poste_details?.titre || 'Non assigné',
-      emp.statut || '',
-      formatDate(emp.date_embauche)
+    const headers = [
+      "Matricule",
+      "Nom",
+      "Prénom",
+      "Email",
+      "Poste",
+      "Statut",
+      "Date embauche",
+    ];
+    const csvData = filteredEmployes.map((emp) => [
+      emp.matricule || "",
+      emp.user?.last_name || "",
+      emp.user?.first_name || "",
+      emp.user?.email || "",
+      emp.poste_details?.titre || "Non assigné",
+      emp.statut || "",
+      formatDate(emp.date_embauche),
     ]);
 
     const csvContent = [headers, ...csvData]
-      .map(row => row.map(field => `"${field}"`).join(','))
-      .join('\n');
+      .map((row) => row.map((field) => `"${field}"`).join(","))
+      .join("\n");
 
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     link.href = url;
-    link.download = `employes_${departement?.nom || 'departement'}_${new Date().toISOString().split('T')[0]}.csv`;
+    link.download = `employes_${departement?.nom || "departement"}_${
+      new Date().toISOString().split("T")[0]
+    }.csv`;
     link.click();
     URL.revokeObjectURL(url);
 
-    showToastMessage('Export CSV généré avec succès', 'success');
+    showToastMessage("Export CSV généré avec succès", "success");
   };
 
   const clearFilters = () => {
@@ -219,7 +228,9 @@ export default function DepartementEmployes() {
         <div className="flex items-center justify-center min-h-96">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#179150] mx-auto mb-4"></div>
-            <p className="text-gray-600 dark:text-gray-400">Chargement des employés...</p>
+            <p className="text-gray-600 dark:text-gray-400">
+              Chargement des employés...
+            </p>
           </div>
         </div>
       </SuperAdminLayout>
@@ -273,14 +284,16 @@ export default function DepartementEmployes() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
             whileHover={{ y: -5, boxShadow: "0 8px 25px rgba(0,0,0,0.15)" }}
-            className="card border-0 shadow-sm rounded-xl bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-900/20 dark:to-blue-800/10 border border-blue-200/50 dark:border-blue-700/50 p-4"
+            className="card border-0 shadow-sm rounded-xl bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-900/20 dark:to-blue-800/10 sm:border border-blue-200/50 dark:border-blue-700/50 p-4"
           >
             <div className="flex justify-between items-center">
               <div>
                 <h4 className="text-2xl font-bold text-blue-600 dark:text-blue-400 mb-1">
                   {stats.total}
                 </h4>
-                <small className="text-gray-600 dark:text-gray-400 text-sm">Total</small>
+                <small className="text-gray-600 dark:text-gray-400 text-sm">
+                  Total
+                </small>
               </div>
               <div className="text-blue-600 dark:text-blue-400">
                 <Users className="w-5 h-5" />
@@ -293,14 +306,16 @@ export default function DepartementEmployes() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: 0.1 }}
             whileHover={{ y: -5, boxShadow: "0 8px 25px rgba(0,0,0,0.15)" }}
-            className="card border-0 shadow-sm rounded-xl bg-gradient-to-br from-green-50 to-green-100/50 dark:from-green-900/20 dark:to-green-800/10 border border-green-200/50 dark:border-green-700/50 p-4"
+            className="card border-0 shadow-sm rounded-xl bg-gradient-to-br from-green-50 to-green-100/50 dark:from-green-900/20 dark:to-green-800/10 sm:border border-green-200/50 dark:border-green-700/50 p-4"
           >
             <div className="flex justify-between items-center">
               <div>
                 <h4 className="text-2xl font-bold text-green-600 dark:text-green-400 mb-1">
                   {stats.actifs}
                 </h4>
-                <small className="text-gray-600 dark:text-gray-400 text-sm">Actifs</small>
+                <small className="text-gray-600 dark:text-gray-400 text-sm">
+                  Actifs
+                </small>
               </div>
               <div className="text-green-600 dark:text-green-400">
                 <CheckCircle className="w-5 h-5" />
@@ -313,14 +328,16 @@ export default function DepartementEmployes() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: 0.2 }}
             whileHover={{ y: -5, boxShadow: "0 8px 25px rgba(0,0,0,0.15)" }}
-            className="card border-0 shadow-sm rounded-xl bg-gradient-to-br from-gray-50 to-gray-100/50 dark:from-gray-700/50 dark:to-gray-600/30 border border-gray-200/50 dark:border-gray-600/50 p-4"
+            className="card border-0 shadow-sm rounded-xl bg-gradient-to-br from-gray-50 to-gray-100/50 dark:from-gray-700/50 dark:to-gray-600/30 sm:border border-gray-200/50 dark:border-gray-600/50 p-4"
           >
             <div className="flex justify-between items-center">
               <div>
                 <h4 className="text-2xl font-bold text-gray-600 dark:text-gray-400 mb-1">
                   {stats.inactifs}
                 </h4>
-                <small className="text-gray-600 dark:text-gray-400 text-sm">Inactifs</small>
+                <small className="text-gray-600 dark:text-gray-400 text-sm">
+                  Inactifs
+                </small>
               </div>
               <div className="text-gray-600 dark:text-gray-400">
                 <AlertCircle className="w-5 h-5" />
@@ -367,7 +384,7 @@ export default function DepartementEmployes() {
           <div className="p-4 bg-gradient-to-br from-blue-50/50 to-indigo-50/50 dark:from-blue-900/10 dark:to-indigo-900/10 border-b border-gray-200 dark:border-gray-700">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-bold text-blue-600 dark:text-blue-400 mb-2 flex items-center">
+                <label className="block text-sm font-bold text-blue-600 dark:text-blue-400 mb-2 md:flex items-center">
                   <Search className="w-3.5 h-3.5 mr-1" />
                   Recherche Globale
                 </label>
@@ -392,7 +409,7 @@ export default function DepartementEmployes() {
               </div>
 
               <div>
-                <label className="block text-sm font-bold text-blue-600 dark:text-blue-400 mb-2 flex items-center">
+                <label className="block text-sm font-bold text-blue-600 dark:text-blue-400 mb-2 md:flex items-center">
                   <Filter className="w-3.5 h-3.5 mr-1" />
                   Statut
                 </label>
@@ -412,7 +429,9 @@ export default function DepartementEmployes() {
 
             {hasActiveFilters && (
               <div className="mt-3 flex items-center gap-2 flex-wrap">
-                <span className="text-xs text-gray-600 dark:text-gray-400">Filtres actifs:</span>
+                <span className="text-xs text-gray-600 dark:text-gray-400">
+                  Filtres actifs:
+                </span>
                 {searchTerm && (
                   <span className="px-2 py-1 bg-blue-500 text-white text-xs font-medium rounded">
                     Recherche: "{searchTerm}"
@@ -509,18 +528,24 @@ export default function DepartementEmployes() {
                               <div className="flex items-start justify-between mb-3">
                                 <div className="flex items-center">
                                   <div className="w-10 h-10 bg-gradient-to-br from-[#179150] to-[#147a43] rounded-full flex items-center justify-center text-white font-semibold text-sm mr-3">
-                                    {getInitials(emp.user?.first_name, emp.user?.last_name)}
+                                    {getInitials(
+                                      emp.user?.first_name,
+                                      emp.user?.last_name
+                                    )}
                                   </div>
                                   <div>
                                     <div className="font-semibold text-gray-900 dark:text-white">
-                                      {emp.user?.first_name} {emp.user?.last_name}
+                                      {emp.user?.first_name}{" "}
+                                      {emp.user?.last_name}
                                     </div>
                                     <div className="text-xs text-gray-600 dark:text-gray-400">
                                       {emp.matricule}
                                     </div>
                                   </div>
                                 </div>
-                                <span className={`inline-flex items-center px-2 py-1 text-xs font-medium rounded ${statutBadge.bg} ${statutBadge.text}`}>
+                                <span
+                                  className={`inline-flex items-center px-2 py-1 text-xs font-medium rounded ${statutBadge.bg} ${statutBadge.text}`}
+                                >
                                   {statutBadge.label}
                                 </span>
                               </div>
@@ -528,7 +553,9 @@ export default function DepartementEmployes() {
                               <div className="space-y-2 text-sm mb-3">
                                 <div className="flex items-center text-gray-600 dark:text-gray-400">
                                   <Mail className="w-3 h-3 mr-2" />
-                                  <span className="truncate">{emp.user?.email}</span>
+                                  <span className="truncate">
+                                    {emp.user?.email}
+                                  </span>
                                 </div>
                                 {emp.telephone && (
                                   <div className="flex items-center text-gray-600 dark:text-gray-400">
@@ -579,12 +606,29 @@ export default function DepartementEmployes() {
       </div>
 
       {/* Toast Notification */}
-      <Toast
-        message={toastMessage}
-        type={toastType}
-        isVisible={showToast}
-        onClose={() => setShowToast(false)}
-      />
+      <AnimatePresence>
+        {showToast && (
+          <motion.div
+            initial={{ opacity: 0, y: 50, x: "-50%" }}
+            animate={{ opacity: 1, y: 0, x: "-50%" }}
+            exit={{ opacity: 0, y: 50, x: "-50%" }}
+            className={cn(
+              "fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 px-6 py-4 rounded-lg shadow-lg flex items-center gap-3",
+              {
+                "bg-green-500 text-white": toastType === "success",
+                "bg-red-500 text-white": toastType === "error",
+              }
+            )}
+          >
+            {toastType === "success" ? (
+              <CheckCircle className="w-5 h-5" />
+            ) : (
+              <AlertCircle className="w-5 h-5" />
+            )}
+            <span>{toastMessage}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Modal de suppression */}
       <AnimatePresence>
@@ -614,8 +658,12 @@ export default function DepartementEmployes() {
                 </div>
               </div>
               <p className="text-gray-600 dark:text-gray-400 mb-6">
-                Êtes-vous sûr de vouloir supprimer l'employé <strong>{employeToDelete?.user?.first_name} {employeToDelete?.user?.last_name}</strong> ?
-                Cette action est irréversible.
+                Êtes-vous sûr de vouloir supprimer l'employé{" "}
+                <strong>
+                  {employeToDelete?.user?.first_name}{" "}
+                  {employeToDelete?.user?.last_name}
+                </strong>{" "}
+                ? Cette action est irréversible.
               </p>
               <div className="flex justify-end gap-3">
                 <button
@@ -638,4 +686,3 @@ export default function DepartementEmployes() {
     </SuperAdminLayout>
   );
 }
-
