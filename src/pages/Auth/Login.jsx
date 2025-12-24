@@ -399,6 +399,14 @@ const Login = () => {
                         {fieldErrors.password[0]}
                       </p>
                     )}
+                    <div className="text-right mt-2">
+                      <Link
+                        to="/forgot-password"
+                        className="text-sm text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300 font-medium transition-colors"
+                      >
+                        Mot de passe oublié ?
+                      </Link>
+                    </div>
                   </div>
 
                   {/* Bouton de connexion */}
