@@ -1,18 +1,23 @@
 import React, { useState, useEffect } from "react";
+import { useAuth } from "../../contexts/AuthContext";
 import {
-  LogOut,
-  User,
   Calendar,
   FileText,
   Bell,
-  MessageCircle,  
+  MessageCircle,
   Clock,
-  Award,  
+  CheckCircle2,
+  XCircle,
+  AlertCircle
 } from "lucide-react";
-import { useAuth } from "@/hooks";
-import api from "@/services/api";
-import { EmployeeDashboardMenu } from "@/constants";
-import { cn } from "@/lib/utils";
+import api from "../../services/api";
+import EmployeLayout from "../../layouts/Employe/Layout";
+import { motion } from "framer-motion";
+import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
+import { Doughnut } from 'react-chartjs-2';
+
+// Enregistrer les composants ChartJS
+ChartJS.register(ArcElement, Tooltip, Legend);
 
 const EmployeeDashboard = () => {
   const { user } = useAuth();
@@ -84,54 +89,20 @@ const EmployeeDashboard = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto"></div>
-          <p className="mt-4 text-gray-600 dark:text-gray-400">
-            Chargement du profil...
-          </p>
+      <EmployeLayout>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto"></div>
+            <p className="mt-4 text-gray-600 dark:text-gray-400">Chargement de votre espace...</p>
+          </div>
         </div>
       </EmployeLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Header */}
-      <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <Award className="h-8 w-8 text-blue-600" />
-              </div>
-              <div className="ml-4">
-                <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
-                  Portail RH - Espace Employé
-                </h1>
-              </div>
-            </div>
-
-            <div className="flex items-center space-x-4">
-              <div className="text-right">
-                <p className="text-sm font-medium text-gray-900 dark:text-white">
-                  {user?.first_name} {user?.last_name}
-                </p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  {profile?.matricule || "Matricule"}
-                </p>
-              </div>
-              <button
-                onClick={handleLogout}
-                className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition-colors"
-              >
-                <LogOut className="h-4 w-4 mr-2" />
-                Déconnexion
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
+    <EmployeLayout>
+      <div className="max-w-7xl mx-auto space-y-6">
 
         {/* Welcome Section */}
         <motion.div
@@ -155,25 +126,7 @@ const EmployeeDashboard = () => {
           </div>
         </motion.div>
 
-                <nav className="space-y-2">
-                  {EmployeeDashboardMenu.map((item) => (
-                    <button
-                      key={item.id}
-                      onClick={() => setActiveTab(item.id)}
-                      className={cn(
-                        "w-full flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors",
-                        activeTab === item.id
-                          ? "bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300"
-                          : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700"
-                      )}
-                    >
-                      <item.icon className="h-4 w-4 mr-3" />
-                      {item.name}
-                    </button>
-                  ))}
-                </nav>
-              </div>
-            </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
           {/* Stats Cards & Chart */}
           <div className="lg:col-span-2 space-y-6">
@@ -226,22 +179,11 @@ const EmployeeDashboard = () => {
                 >
                   <div className="flex justify-between items-center">
                     <div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        Email
-                      </p>
-                      <p className="text-sm font-medium text-gray-900 dark:text-white">
-                        {user?.email}
-                      </p>
+                      <p className="text-purple-100 text-sm font-medium">Documents à signer</p>
+                      <p className="text-2xl font-bold mt-1">{stats.documentsAttente}</p>
                     </div>
-                    <div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        Date d'embauche
-                      </p>
-                      <p className="text-sm font-medium text-gray-900 dark:text-white">
-                        {profile?.date_embauche
-                          ? new Date(profile.date_embauche).toLocaleDateString()
-                          : "Non spécifiée"}
-                      </p>
+                    <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
+                      <FileText className="w-6 h-6 text-white" />
                     </div>
                   </div>
                 </motion.div>
@@ -254,20 +196,11 @@ const EmployeeDashboard = () => {
                 >
                   <div className="flex justify-between items-center">
                     <div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        Statut
-                      </p>
-                      <p className="text-sm font-medium text-gray-900 dark:text-white capitalize">
-                        {profile?.statut || "Actif"}
-                      </p>
+                      <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">Notifications</p>
+                      <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">{stats.notifications}</p>
                     </div>
-                    <div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        Poste
-                      </p>
-                      <p className="text-sm font-medium text-gray-900 dark:text-white">
-                        {profile?.poste_details?.titre || "Non spécifié"}
-                      </p>
+                    <div className="p-2 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+                      <Bell className="w-6 h-6 text-yellow-600 dark:text-yellow-400" />
                     </div>
                   </div>
                 </motion.div>

@@ -1,73 +1,12 @@
 # React + Vite
 
-Modern React application powered by Vite and Tailwind CSS v4.
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-Contents
-- Overview
-- Requirements
-- Getting Started
-- Available Scripts
-- Tech Stack
-- Tailwind CSS v4 Notes
-- Contributing (Branches, Commit prefixes, PRs)
+Currently, two official plugins are available:
 
-Overview
-This repository contains the frontend for the MINSATE RH portal. It uses Vite for fast dev/build, React 19, and Tailwind CSS v4 with the official @tailwindcss/vite plugin.
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 
-Requirements
-- Node.js >= 18
-- npm >= 9
+## Expanding the ESLint configuration
 
-Getting Started
-1) Install dependencies
-   npm install
-
-2) Start the dev server
-   npm run dev
-   The app will be available at http://localhost:5173/
-
-3) Production build
-   npm run build
-
-4) Preview the production build locally
-   npm run preview
-
-Available Scripts
-- dev: Start Vite in development mode
-- build: Create a production build
-- preview: Preview the production build
-- lint: Run ESLint
-
-Tech Stack
-- React 19
-- Vite 7
-- Tailwind CSS 4 with @tailwindcss/vite
-- ESLint 9
-
-Tailwind CSS v4 Notes
-- Tailwind v4 uses the @tailwindcss/vite plugin and works without a tailwind.config.js file.
-- Global CSS includes Tailwind via:
-  @import "tailwindcss";
-- Design tokens are defined via CSS variables (e.g., in src/index.css) and can be mapped with @theme inline.
-
-Contributing
-- Branching strategy
-  - feature work: feat/...
-  - refactoring: refactor/...
-  - fixes: fix/...
-  - chores and docs: chore/...
-  - hotfixes: hotfix/...
-
-- Commit message prefixes (required)
-  - chore(scope): description
-  - fix(scope): description
-  - feat(scope): description
-  - hotfix(scope): description
-  - refactor(scope): description
-
-- Pull Requests
-  - Open PRs against the develop branch.
-  - Default remote is origin (not upstream).
-
-Notes
-- If you add environment variables, document them here (e.g. .env, VITE_API_URL, etc.).
+If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.

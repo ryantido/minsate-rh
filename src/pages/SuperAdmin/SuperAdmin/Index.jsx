@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import SuperAdminLayout from "@/layouts/SuperAdmin/Layout";
+import SuperAdminLayout from "../../../layouts/SuperAdmin/Layout";
 import {
   Users,
   UserPlus,
@@ -15,19 +15,25 @@ import {
   RefreshCw,
   Download,
   AlertCircle,
+  TrendingUp,
   Activity,
   Mail,
   Calendar,
+  FileText,
+  File,
   Settings,
+  Filter,
   Info,
   XCircle,
-  Sliders,
+  User as UserIcon,
+  Clock,
+  Sliders
 } from "lucide-react";
-import { motion, AnimatePresence } from "motion/react";
-import api from "@/services/api";
-import { cn, formatDate, getInitials } from "@/lib/utils";
+import { motion, AnimatePresence } from 'framer-motion';
+import api from "../../../services/api";
+import Toast from "../../../components/ui/Toast";
 
-export default function SuperAdminList() {
+export default function AdminList() {
   const navigate = useNavigate();
   const [admins, setAdmins] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -39,8 +45,7 @@ export default function SuperAdminList() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showDeleteGroupModal, setShowDeleteGroupModal] = useState(false);
   const [showActivateGroupModal, setShowActivateGroupModal] = useState(false);
-  const [showDeactivateGroupModal, setShowDeactivateGroupModal] =
-    useState(false);
+  const [showDeactivateGroupModal, setShowDeactivateGroupModal] = useState(false);
   const [adminToDelete, setAdminToDelete] = useState(null);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
@@ -48,7 +53,7 @@ export default function SuperAdminList() {
   const [stats, setStats] = useState({
     total: 0,
     actifs: 0,
-    inactifs: 0,
+    inactifs: 0
   });
 
   useEffect(() => {
@@ -58,15 +63,12 @@ export default function SuperAdminList() {
   const fetchAdmins = async () => {
     try {
       setLoading(true);
-      const response = await api.get("/users/superadmins/");
+      const response = await api.get('/users/superadmins/');
       setAdmins(response.data);
       calculateStats(response.data);
     } catch (error) {
-      console.error("Erreur lors du chargement:", error);
-      showToastMessage(
-        "Erreur lors du chargement des supers administrateurs",
-        error
-      );
+      console.error('Erreur lors du chargement:', error);
+      showToastMessage('Erreur lors du chargement des supers administrateurs', 'error');
     } finally {
       setLoading(false);
     }
@@ -74,29 +76,28 @@ export default function SuperAdminList() {
 
   const calculateStats = (data) => {
     const total = data.length;
-    const actifs = data.filter((admin) => admin.is_verified).length;
+    const actifs = data.filter(admin => admin.is_verified).length;
     const inactifs = total - actifs;
 
     setStats({ total, actifs, inactifs });
   };
 
-  const showToastMessage = (message, type = "success") => {
+  const showToastMessage = (message, type = 'success') => {
     setToastMessage(message);
     setToastType(type);
     setShowToast(true);
     setTimeout(() => setShowToast(false), 4000);
   };
 
-  const filteredAdmins = admins.filter((admin) => {
+  const filteredAdmins = admins.filter(admin => {
     const matchesSearch =
       admin.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       admin.last_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       admin.email?.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesStatus =
-      !statusFilter ||
-      (statusFilter === "active" && admin.is_verified) ||
-      (statusFilter === "inactive" && !admin.is_verified);
+    const matchesStatus = !statusFilter ||
+      (statusFilter === 'active' && admin.is_verified) ||
+      (statusFilter === 'inactive' && !admin.is_verified);
 
     return matchesSearch && matchesStatus;
   });
@@ -104,16 +105,12 @@ export default function SuperAdminList() {
   // Gestion des sélections
   useEffect(() => {
     setShowBulkActions(selectedAdmins.size > 0);
-    setSelectAll(
-      selectedAdmins.size === filteredAdmins.length && filteredAdmins.length > 0
-    );
+    setSelectAll(selectedAdmins.size === filteredAdmins.length && filteredAdmins.length > 0);
   }, [selectedAdmins, filteredAdmins.length]);
 
   const handleSelectAll = (e) => {
     if (e.target.checked) {
-      const allIds = new Set(
-        filteredAdmins.map((admin) => admin.id.toString())
-      );
+      const allIds = new Set(filteredAdmins.map(admin => admin.id.toString()));
       setSelectedAdmins(allIds);
       setSelectAll(true);
     } else {
@@ -148,12 +145,12 @@ export default function SuperAdminList() {
 
     try {
       await api.delete(`/users/superadmins/${adminToDelete.id}/`);
-      showToastMessage("Super Administrateur supprimé avec succès", "success");
+      showToastMessage('Super Administrateur supprimé avec succès', 'success');
       fetchAdmins();
       setSelectedAdmins(new Set());
     } catch (error) {
-      console.error("Erreur lors de la suppression:", error);
-      showToastMessage("Erreur lors de la suppression", error);
+      console.error('Erreur lors de la suppression:', error);
+      showToastMessage('Erreur lors de la suppression', 'error');
     } finally {
       setShowDeleteModal(false);
       setAdminToDelete(null);
@@ -163,73 +160,73 @@ export default function SuperAdminList() {
   const handleBulkDelete = async () => {
     try {
       const idsArray = Array.from(selectedAdmins);
-      await Promise.all(
-        idsArray.map((id) => api.delete(`/users/superadmins/${id}/`))
-      );
-      showToastMessage(
-        `${idsArray.length} super(s) administrateur(s) supprimé(s) avec succès`,
-        "success"
-      );
+      await Promise.all(idsArray.map(id => api.delete(`/users/superadmins/${id}/`)));
+      showToastMessage(`${idsArray.length} super(s) administrateur(s) supprimé(s) avec succès`, 'success');
       fetchAdmins();
       setSelectedAdmins(new Set());
       setShowDeleteGroupModal(false);
     } catch (error) {
-      console.error("Erreur lors de la suppression groupée:", error);
-      showToastMessage("Erreur lors de la suppression groupée", error);
+      console.error('Erreur lors de la suppression groupée:', error);
+      showToastMessage('Erreur lors de la suppression groupée', 'error');
     }
   };
 
   const handleBulkToggleStatus = async (newStatus) => {
     try {
       const idsArray = Array.from(selectedAdmins);
-      await Promise.all(
-        idsArray.map((id) =>
-          api.patch(`/users/superadmins/${id}/`, {
-            is_verified: newStatus === "activate",
-          })
-        )
-      );
+      await Promise.all(idsArray.map(id =>
+        api.patch(`/users/superadmins/${id}/`, { is_verified: newStatus === 'activate' })
+      ));
       showToastMessage(
-        `${idsArray.length} super(s) administrateur(s) ${
-          newStatus === "activate" ? "activé(s)" : "désactivé(s)"
-        } avec succès`,
-        "success"
+        `${idsArray.length} super(s) administrateur(s) ${newStatus === 'activate' ? 'activé(s)' : 'désactivé(s)'} avec succès`,
+        'success'
       );
       fetchAdmins();
       setSelectedAdmins(new Set());
       setShowActivateGroupModal(false);
       setShowDeactivateGroupModal(false);
     } catch (error) {
-      console.error("Erreur lors de la modification groupée:", error);
-      showToastMessage("Erreur lors de la modification groupée", error);
+      console.error('Erreur lors de la modification groupée:', error);
+      showToastMessage('Erreur lors de la modification groupée', 'error');
     }
   };
 
+  const getInitials = (firstName, lastName) => {
+    return `${firstName?.charAt(0) || ''}${lastName?.charAt(0) || ''}`.toUpperCase();
+  };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return 'Non renseigné';
+    return new Date(dateString).toLocaleDateString('fr-FR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
+  };
+
   const exportToCSV = () => {
-    const headers = ["Nom", "Prénom", "Email", "Statut", "Date création"];
-    const csvData = filteredAdmins.map((admin) => [
-      admin.last_name || "",
-      admin.first_name || "",
-      admin.email || "",
-      admin.is_verified ? "Actif" : "Inactif",
-      formatDate(admin.created_at),
+    const headers = ['Nom', 'Prénom', 'Email', 'Statut', 'Date création'];
+    const csvData = filteredAdmins.map(admin => [
+      admin.last_name || '',
+      admin.first_name || '',
+      admin.email || '',
+      admin.is_verified ? 'Actif' : 'Inactif',
+      formatDate(admin.created_at)
     ]);
 
     const csvContent = [headers, ...csvData]
-      .map((row) => row.map((field) => `"${field}"`).join(","))
-      .join("\n");
+      .map(row => row.map(field => `"${field}"`).join(','))
+      .join('\n');
 
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
+    const link = document.createElement('a');
     link.href = url;
-    link.download = `supers_administrateurs_${
-      new Date().toISOString().split("T")[0]
-    }.csv`;
+    link.download = `supers_administrateurs_${new Date().toISOString().split('T')[0]}.csv`;
     link.click();
     URL.revokeObjectURL(url);
 
-    showToastMessage("Export CSV généré avec succès", "success");
+    showToastMessage('Export CSV généré avec succès', 'success');
   };
 
   const hasActiveFilters = searchTerm || statusFilter;
@@ -240,9 +237,7 @@ export default function SuperAdminList() {
         <div className="flex items-center justify-center min-h-96">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#179150] mx-auto mb-4"></div>
-            <p className="text-gray-600 dark:text-gray-400">
-              Chargement des supers administrateurs...
-            </p>
+            <p className="text-gray-600 dark:text-gray-400">Chargement des supers administrateurs...</p>
           </div>
         </div>
       </SuperAdminLayout>
@@ -281,16 +276,14 @@ export default function SuperAdminList() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
             whileHover={{ y: -5, boxShadow: "0 8px 25px rgba(0,0,0,0.15)" }}
-            className="card border-0 shadow-sm rounded-xl bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-900/20 dark:to-blue-800/10 sm:border border-blue-200/50 dark:border-blue-700/50 p-4"
+            className="card border-0 shadow-sm rounded-xl bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-900/20 dark:to-blue-800/10 border border-blue-200/50 dark:border-blue-700/50 p-4"
           >
             <div className="flex justify-between items-center">
               <div>
                 <h4 className="text-2xl font-bold text-blue-600 dark:text-blue-400 mb-1">
                   {stats.total}
                 </h4>
-                <small className="text-gray-600 dark:text-gray-400 text-sm">
-                  Total
-                </small>
+                <small className="text-gray-600 dark:text-gray-400 text-sm">Total</small>
               </div>
               <div className="text-blue-600 dark:text-blue-400">
                 <Users className="w-5 h-5" />
@@ -303,16 +296,14 @@ export default function SuperAdminList() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: 0.1 }}
             whileHover={{ y: -5, boxShadow: "0 8px 25px rgba(0,0,0,0.15)" }}
-            className="card border-0 shadow-sm rounded-xl bg-gradient-to-br from-green-50 to-green-100/50 dark:from-green-900/20 dark:to-green-800/10 sm:border border-green-200/50 dark:border-green-700/50 p-4"
+            className="card border-0 shadow-sm rounded-xl bg-gradient-to-br from-green-50 to-green-100/50 dark:from-green-900/20 dark:to-green-800/10 border border-green-200/50 dark:border-green-700/50 p-4"
           >
             <div className="flex justify-between items-center">
               <div>
                 <h4 className="text-2xl font-bold text-green-600 dark:text-green-400 mb-1">
                   {stats.actifs}
                 </h4>
-                <small className="text-gray-600 dark:text-gray-400 text-sm">
-                  Actifs
-                </small>
+                <small className="text-gray-600 dark:text-gray-400 text-sm">Actifs</small>
               </div>
               <div className="text-green-600 dark:text-green-400">
                 <UserCheck className="w-5 h-5" />
@@ -325,16 +316,14 @@ export default function SuperAdminList() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: 0.2 }}
             whileHover={{ y: -5, boxShadow: "0 8px 25px rgba(0,0,0,0.15)" }}
-            className="card border-0 shadow-sm rounded-xl bg-gradient-to-br from-gray-50 to-gray-100/50 dark:from-gray-700/50 dark:to-gray-600/30 sm:border border-gray-200/50 dark:border-gray-600/50 p-4"
+            className="card border-0 shadow-sm rounded-xl bg-gradient-to-br from-gray-50 to-gray-100/50 dark:from-gray-700/50 dark:to-gray-600/30 border border-gray-200/50 dark:border-gray-600/50 p-4"
           >
             <div className="flex justify-between items-center">
               <div>
                 <h4 className="text-2xl font-bold text-gray-600 dark:text-gray-400 mb-1">
                   {stats.inactifs}
                 </h4>
-                <small className="text-gray-600 dark:text-gray-400 text-sm">
-                  Inactifs
-                </small>
+                <small className="text-gray-600 dark:text-gray-400 text-sm">Inactifs</small>
               </div>
               <div className="text-gray-600 dark:text-gray-400">
                 <UserX className="w-5 h-5" />
@@ -386,8 +375,8 @@ export default function SuperAdminList() {
           <div className="p-4 bg-gradient-to-br from-blue-50/50 to-indigo-50/50 dark:from-blue-900/10 dark:to-indigo-900/10 border-b border-gray-200 dark:border-gray-700 rounded-t-lg">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {/* Recherche Globale */}
-              <div className="md:col-span-3">
-                <label className="block text-sm font-bold text-blue-600 dark:text-blue-400 mb-2 md:flex items-center">
+              <div className="md:col-span-1">
+                <label className="block text-sm font-bold text-blue-600 dark:text-blue-400 mb-2 flex items-center">
                   <Search className="w-3.5 h-3.5 mr-1" />
                   Recherche Globale
                 </label>
@@ -413,7 +402,7 @@ export default function SuperAdminList() {
 
               {/* Statut */}
               <div>
-                <label className="block text-sm font-bold text-blue-600 dark:text-blue-400 mb-2 md:flex items-center">
+                <label className="block text-sm font-bold text-blue-600 dark:text-blue-400 mb-2 flex items-center">
                   <Activity className="w-3.5 h-3.5 mr-1" />
                   Statut
                 </label>
@@ -429,7 +418,7 @@ export default function SuperAdminList() {
               </div>
 
               {/* Actions filtres */}
-              <div className="md:flex items-end gap-2">
+              <div className="flex items-end gap-2">
                 <button
                   onClick={clearFilters}
                   className="flex-1 flex items-center justify-center px-4 py-2.5 bg-white dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 rounded-lg transition-colors font-medium"
@@ -456,7 +445,7 @@ export default function SuperAdminList() {
                     )}
                     {statusFilter && (
                       <span className="px-2 py-1 bg-indigo-500 text-white text-xs font-medium rounded">
-                        {statusFilter === "active" ? "Actif" : "Inactif"}
+                        {statusFilter === 'active' ? 'Actif' : 'Inactif'}
                       </span>
                     )}
                   </div>
@@ -477,7 +466,7 @@ export default function SuperAdminList() {
             {showBulkActions && (
               <motion.div
                 initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
+                animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
                 className="p-4 bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-900/20 dark:to-amber-900/20 border-b border-yellow-200 dark:border-yellow-700"
               >
@@ -485,10 +474,7 @@ export default function SuperAdminList() {
                   <div className="flex items-center">
                     <Sliders className="w-4 h-4 text-yellow-600 dark:text-yellow-400 mr-2" />
                     <span className="font-bold text-gray-900 dark:text-white">
-                      <span className="text-yellow-600 dark:text-yellow-400">
-                        {selectedAdmins.size}
-                      </span>{" "}
-                      administrateur(s) sélectionné(s)
+                      <span className="text-yellow-600 dark:text-yellow-400">{selectedAdmins.size}</span> administrateur(s) sélectionné(s)
                     </span>
                   </div>
                   <div className="flex gap-2 flex-wrap">
@@ -604,14 +590,10 @@ export default function SuperAdminList() {
                       </div>
                     </td>
                     <td className="px-6 py-4 text-center hidden lg:table-cell">
-                      <span
-                        className={cn(
-                          "inline-flex items-center px-2.5 py-1 text-xs font-medium rounded-full",
-                          admin.is_verified
-                            ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
-                            : "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300"
-                        )}
-                      >
+                      <span className={`inline-flex items-center px-2.5 py-1 text-xs font-medium rounded-full ${admin.is_verified
+                        ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                        : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
+                        }`}>
                         {admin.is_verified ? (
                           <>
                             <CheckCircle className="w-3 h-3 mr-1" />
@@ -665,14 +647,13 @@ export default function SuperAdminList() {
             >
               <Settings className="w-16 h-16 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
               <h5 className="text-gray-600 dark:text-gray-400 text-lg font-semibold mb-4">
-                {hasActiveFilters
-                  ? "Aucun administrateur système trouvé"
-                  : "Aucun administrateur système"}
+                {hasActiveFilters ? 'Aucun super administrateur trouvé' : 'Aucun super administrateur'}
               </h5>
               <p className="text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">
                 {hasActiveFilters
-                  ? "Aucun administrateur système ne correspond à vos critères de recherche."
-                  : "Commencez par créer votre premier administrateur système."}
+                  ? "Aucun super administrateur ne correspond à vos critères de recherche."
+                  : "Commencez par créer votre premier super administrateur."
+                }
               </p>
               <div className="flex gap-2 justify-center">
                 {!hasActiveFilters && (
@@ -726,19 +707,13 @@ export default function SuperAdminList() {
                 </div>
                 <div className="p-6">
                   <p className="text-gray-700 dark:text-gray-300 mb-4">
-                    Êtes-vous sûr de vouloir supprimer les{" "}
-                    <strong className="text-red-600">
-                      {selectedAdmins.size} administrateur(s) système
-                    </strong>{" "}
-                    sélectionné(s) ?
+                    Êtes-vous sûr de vouloir supprimer les <strong className="text-red-600">{selectedAdmins.size} super(s) administrateur(s)</strong> sélectionné(s) ?
                   </p>
                   <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 p-4 mb-4 rounded-lg">
                     <div className="flex items-start">
                       <AlertCircle className="w-4 h-4 text-yellow-600 mr-2 mt-0.5 flex-shrink-0" />
                       <p className="text-sm text-yellow-700 dark:text-yellow-300">
-                        <strong>Attention !</strong> Cette action est
-                        irréversible et supprimera définitivement tous les
-                        comptes sélectionnés.
+                        <strong>Attention !</strong> Cette action est irréversible et supprimera définitivement tous les comptes sélectionnés.
                       </p>
                     </div>
                   </div>
@@ -790,18 +765,13 @@ export default function SuperAdminList() {
                 </div>
                 <div className="p-6">
                   <p className="text-gray-700 dark:text-gray-300 mb-4">
-                    Êtes-vous sûr de vouloir activer les{" "}
-                    <strong className="text-green-600">
-                      {selectedAdmins.size} administrateur(s) système
-                    </strong>{" "}
-                    sélectionné(s) ?
+                    Êtes-vous sûr de vouloir activer les <strong className="text-green-600">{selectedAdmins.size} super(s) administrateur(s)</strong> sélectionné(s) ?
                   </p>
                   <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 p-4 mb-4 rounded-lg">
                     <div className="flex items-start">
                       <Info className="w-4 h-4 text-blue-600 mr-2 mt-0.5 flex-shrink-0" />
                       <p className="text-sm text-blue-700 dark:text-blue-300">
-                        Les administrateurs activés pourront à nouveau accéder à
-                        leur compte.
+                        Les administrateurs activés pourront à nouveau accéder à leur compte.
                       </p>
                     </div>
                   </div>
@@ -813,7 +783,7 @@ export default function SuperAdminList() {
                       Annuler
                     </button>
                     <button
-                      onClick={() => handleBulkToggleStatus("activate")}
+                      onClick={() => handleBulkToggleStatus('activate')}
                       className="flex-1 px-4 py-2 bg-green-600 text-white font-medium hover:bg-green-700 transition-colors rounded-lg flex items-center justify-center"
                     >
                       <UserCheck className="w-4 h-4 mr-2" />
@@ -853,18 +823,13 @@ export default function SuperAdminList() {
                 </div>
                 <div className="p-6">
                   <p className="text-gray-700 dark:text-gray-300 mb-4">
-                    Êtes-vous sûr de vouloir désactiver les{" "}
-                    <strong className="text-yellow-600">
-                      {selectedAdmins.size} administrateur(s) système
-                    </strong>{" "}
-                    sélectionné(s) ?
+                    Êtes-vous sûr de vouloir désactiver les <strong className="text-yellow-600">{selectedAdmins.size} super(s) administrateur(s)</strong> sélectionné(s) ?
                   </p>
                   <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 p-4 mb-4 rounded-lg">
                     <div className="flex items-start">
                       <AlertCircle className="w-4 h-4 text-yellow-600 mr-2 mt-0.5 flex-shrink-0" />
                       <p className="text-sm text-yellow-700 dark:text-yellow-300">
-                        Les administrateurs désactivés ne pourront plus accéder
-                        à leur compte.
+                        Les administrateurs désactivés ne pourront plus accéder à leur compte.
                       </p>
                     </div>
                   </div>
@@ -876,7 +841,7 @@ export default function SuperAdminList() {
                       Annuler
                     </button>
                     <button
-                      onClick={() => handleBulkToggleStatus("deactivate")}
+                      onClick={() => handleBulkToggleStatus('deactivate')}
                       className="flex-1 px-4 py-2 bg-yellow-600 text-white font-medium hover:bg-yellow-700 transition-colors rounded-lg flex items-center justify-center"
                     >
                       <UserX className="w-4 h-4 mr-2" />
@@ -916,19 +881,14 @@ export default function SuperAdminList() {
 
                 <div className="p-6">
                   <p className="text-gray-700 dark:text-gray-300 mb-4">
-                    Êtes-vous sûr de vouloir supprimer le super administrateur{" "}
-                    <strong>
-                      {adminToDelete.first_name} {adminToDelete.last_name}
-                    </strong>{" "}
-                    ?
+                    Êtes-vous sûr de vouloir supprimer le super administrateur <strong>{adminToDelete.first_name} {adminToDelete.last_name}</strong> ?
                   </p>
 
                   <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 p-4 mb-4">
                     <div className="flex items-center">
                       <AlertCircle className="w-4 h-4 text-red-600 mr-2 flex-shrink-0" />
                       <p className="text-sm text-red-700 dark:text-red-300">
-                        Cette action est irréversible. Toutes les données
-                        associées seront définitivement supprimées.
+                        Cette action est irréversible. Toutes les données associées seront définitivement supprimées.
                       </p>
                     </div>
                   </div>
@@ -957,56 +917,12 @@ export default function SuperAdminList() {
           )}
         </AnimatePresence>
 
-        {/* Notifications Toast */}
-        <AnimatePresence>
-          {showToast && (
-            <motion.div
-              initial={{ opacity: 0, x: 100 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 100 }}
-              className="fixed bottom-4 right-4 z-50"
-            >
-              <div
-                className={cn(
-                  "border",
-                  toastType === "success"
-                    ? "bg-[#179150]/10 border-[#179150]/20"
-                    : "bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-800",
-                  "p-4 max-w-sm"
-                )}
-              >
-                <div className="flex items-center">
-                  <div
-                    className={cn(
-                      "flex-shrink-0",
-                      toastType === "success"
-                        ? "text-[#179150]"
-                        : "text-red-600"
-                    )}
-                  >
-                    {toastType === "success" ? (
-                      <CheckCircle className="w-5 h-5" />
-                    ) : (
-                      <AlertCircle className="w-5 h-5" />
-                    )}
-                  </div>
-                  <div className="ml-3">
-                    <p
-                      className={cn(
-                        "text-sm font-medium",
-                        toastType === "success"
-                          ? "text-[#179150]"
-                          : "text-red-800 dark:text-red-400"
-                      )}
-                    >
-                      {toastMessage}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        <Toast
+          message={toastMessage}
+          type={toastType}
+          isVisible={showToast}
+          onClose={() => setShowToast(false)}
+        />
       </div>
     </SuperAdminLayout>
   );

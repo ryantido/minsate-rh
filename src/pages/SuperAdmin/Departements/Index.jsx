@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import SuperAdminLayout from "@/layouts/SuperAdmin/Layout";
+import SuperAdminLayout from "../../../layouts/SuperAdmin/Layout";
 import {
   FolderTree,
   Plus,
@@ -11,16 +11,20 @@ import {
   RefreshCw,
   Download,
   AlertCircle,
+  TrendingUp,
   Calendar,
   User,
   X,
+  Filter,
+  Info,
   XCircle,
+  Clock,
   Building2,
-  CheckCircle,
+  CheckCircle
 } from "lucide-react";
-import { motion, AnimatePresence } from "motion/react";
-import api from "@/services/api";
-import { cn } from "@/lib/utils";
+import { motion, AnimatePresence } from 'framer-motion';
+import api from "../../../services/api";
+import Toast from "../../../components/ui/Toast";
 
 export default function DepartementList() {
   const navigate = useNavigate();
@@ -39,7 +43,7 @@ export default function DepartementList() {
   const [stats, setStats] = useState({
     total: 0,
     avecChef: 0,
-    sansChef: 0,
+    sansChef: 0
   });
 
   useEffect(() => {
@@ -49,12 +53,12 @@ export default function DepartementList() {
   const fetchDepartements = async () => {
     try {
       setLoading(true);
-      const response = await api.get("/users/departements/");
+      const response = await api.get('/users/departements/');
       setDepartements(response.data);
       calculateStats(response.data);
     } catch (error) {
-      console.error("Erreur lors du chargement:", error);
-      showToastMessage("Erreur lors du chargement des départements", error);
+      console.error('Erreur lors du chargement:', error);
+      showToastMessage('Erreur lors du chargement des départements', 'error');
     } finally {
       setLoading(false);
     }
@@ -62,20 +66,20 @@ export default function DepartementList() {
 
   const calculateStats = (data) => {
     const total = data.length;
-    const avecChef = data.filter((dept) => dept.chef_departement).length;
+    const avecChef = data.filter(dept => dept.chef_departement).length;
     const sansChef = total - avecChef;
 
     setStats({ total, avecChef, sansChef });
   };
 
-  const showToastMessage = (message, type = "success") => {
+  const showToastMessage = (message, type = 'success') => {
     setToastMessage(message);
     setToastType(type);
     setShowToast(true);
     setTimeout(() => setShowToast(false), 4000);
   };
 
-  const filteredDepartements = departements.filter((dept) => {
+  const filteredDepartements = departements.filter(dept => {
     const matchesSearch =
       dept.nom?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       dept.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -87,17 +91,12 @@ export default function DepartementList() {
   // Gestion des sélections
   useEffect(() => {
     setShowBulkActions(selectedDepartements.size > 0);
-    setSelectAll(
-      selectedDepartements.size === filteredDepartements.length &&
-        filteredDepartements.length > 0
-    );
+    setSelectAll(selectedDepartements.size === filteredDepartements.length && filteredDepartements.length > 0);
   }, [selectedDepartements, filteredDepartements.length]);
 
   const handleSelectAll = (e) => {
     if (e.target.checked) {
-      const allIds = new Set(
-        filteredDepartements.map((dept) => dept.id.toString())
-      );
+      const allIds = new Set(filteredDepartements.map(dept => dept.id.toString()));
       setSelectedDepartements(allIds);
       setSelectAll(true);
     } else {
@@ -131,16 +130,13 @@ export default function DepartementList() {
 
     try {
       await api.delete(`/users/departements/${departementToDelete.id}/`);
-      showToastMessage("Département supprimé avec succès", "success");
+      showToastMessage('Département supprimé avec succès', 'success');
       fetchDepartements();
       setSelectedDepartements(new Set());
     } catch (error) {
-      console.error("Erreur lors de la suppression:", error);
-      const errorMsg =
-        error.response?.data?.message ||
-        error.response?.data?.error ||
-        "Erreur lors de la suppression";
-      showToastMessage(errorMsg, error);
+      console.error('Erreur lors de la suppression:', error);
+      const errorMsg = error.response?.data?.message || error.response?.data?.error || 'Erreur lors de la suppression';
+      showToastMessage(errorMsg, 'error');
     } finally {
       setShowDeleteModal(false);
       setDepartementToDelete(null);
@@ -150,60 +146,48 @@ export default function DepartementList() {
   const handleBulkDelete = async () => {
     try {
       const idsArray = Array.from(selectedDepartements);
-      await Promise.all(
-        idsArray.map((id) => api.delete(`/users/departements/${id}/`))
-      );
-      showToastMessage(
-        `${idsArray.length} département(s) supprimé(s) avec succès`,
-        "success"
-      );
+      await Promise.all(idsArray.map(id => api.delete(`/users/departements/${id}/`)));
+      showToastMessage(`${idsArray.length} département(s) supprimé(s) avec succès`, 'success');
       fetchDepartements();
       setSelectedDepartements(new Set());
       setShowDeleteGroupModal(false);
     } catch (error) {
-      console.error("Erreur lors de la suppression groupée:", error);
-      showToastMessage("Erreur lors de la suppression groupée", error);
+      console.error('Erreur lors de la suppression groupée:', error);
+      showToastMessage('Erreur lors de la suppression groupée', 'error');
     }
   };
 
   const formatDate = (dateString) => {
-    if (!dateString) return "Non renseigné";
-    return new Date(dateString).toLocaleDateString("fr-FR", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
+    if (!dateString) return 'Non renseigné';
+    return new Date(dateString).toLocaleDateString('fr-FR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
     });
   };
 
   const exportToCSV = () => {
-    const headers = [
-      "Nom",
-      "Description",
-      "Chef de département",
-      "Date création",
-    ];
-    const csvData = filteredDepartements.map((dept) => [
-      dept.nom || "",
-      dept.description || "",
-      dept.chef_info?.name || "Non assigné",
-      formatDate(dept.created_at),
+    const headers = ['Nom', 'Description', 'Chef de département', 'Date création'];
+    const csvData = filteredDepartements.map(dept => [
+      dept.nom || '',
+      dept.description || '',
+      dept.chef_info?.name || 'Non assigné',
+      formatDate(dept.created_at)
     ]);
 
     const csvContent = [headers, ...csvData]
-      .map((row) => row.map((field) => `"${field}"`).join(","))
-      .join("\n");
+      .map(row => row.map(field => `"${field}"`).join(','))
+      .join('\n');
 
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
+    const link = document.createElement('a');
     link.href = url;
-    link.download = `departements_${
-      new Date().toISOString().split("T")[0]
-    }.csv`;
+    link.download = `departements_${new Date().toISOString().split('T')[0]}.csv`;
     link.click();
     URL.revokeObjectURL(url);
 
-    showToastMessage("Export CSV généré avec succès", "success");
+    showToastMessage('Export CSV généré avec succès', 'success');
   };
 
   const hasActiveFilters = searchTerm;
@@ -214,9 +198,7 @@ export default function DepartementList() {
         <div className="flex items-center justify-center min-h-96">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#179150] mx-auto mb-4"></div>
-            <p className="text-gray-600 dark:text-gray-400">
-              Chargement des départements...
-            </p>
+            <p className="text-gray-600 dark:text-gray-400">Chargement des départements...</p>
           </div>
         </div>
       </SuperAdminLayout>
@@ -264,16 +246,14 @@ export default function DepartementList() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
             whileHover={{ y: -5, boxShadow: "0 8px 25px rgba(0,0,0,0.15)" }}
-            className="card border-0 shadow-sm rounded-xl bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-900/20 dark:to-blue-800/10 sm:border border-blue-200/50 dark:border-blue-700/50 p-4"
+            className="card border-0 shadow-sm rounded-xl bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-900/20 dark:to-blue-800/10 border border-blue-200/50 dark:border-blue-700/50 p-4"
           >
             <div className="flex justify-between items-center">
               <div>
                 <h4 className="text-2xl font-bold text-blue-600 dark:text-blue-400 mb-1">
                   {stats.total}
                 </h4>
-                <small className="text-gray-600 dark:text-gray-400 text-sm">
-                  Total Départements
-                </small>
+                <small className="text-gray-600 dark:text-gray-400 text-sm">Total Départements</small>
               </div>
               <div className="text-blue-600 dark:text-blue-400">
                 <Building2 className="w-5 h-5" />
@@ -286,16 +266,14 @@ export default function DepartementList() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: 0.1 }}
             whileHover={{ y: -5, boxShadow: "0 8px 25px rgba(0,0,0,0.15)" }}
-            className="card border-0 shadow-sm rounded-xl bg-gradient-to-br from-green-50 to-green-100/50 dark:from-green-900/20 dark:to-green-800/10 sm:border border-green-200/50 dark:border-green-700/50 p-4"
+            className="card border-0 shadow-sm rounded-xl bg-gradient-to-br from-green-50 to-green-100/50 dark:from-green-900/20 dark:to-green-800/10 border border-green-200/50 dark:border-green-700/50 p-4"
           >
             <div className="flex justify-between items-center">
               <div>
                 <h4 className="text-2xl font-bold text-green-600 dark:text-green-400 mb-1">
                   {stats.avecChef}
                 </h4>
-                <small className="text-gray-600 dark:text-gray-400 text-sm">
-                  Avec Chef
-                </small>
+                <small className="text-gray-600 dark:text-gray-400 text-sm">Avec Chef</small>
               </div>
               <div className="text-green-600 dark:text-green-400">
                 <User className="w-5 h-5" />
@@ -308,16 +286,14 @@ export default function DepartementList() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: 0.2 }}
             whileHover={{ y: -5, boxShadow: "0 8px 25px rgba(0,0,0,0.15)" }}
-            className="card border-0 shadow-sm rounded-xl bg-gradient-to-br from-orange-50 to-orange-100/50 dark:from-orange-900/20 dark:to-orange-800/10 sm:border border-orange-200/50 dark:border-orange-700/50 p-4"
+            className="card border-0 shadow-sm rounded-xl bg-gradient-to-br from-orange-50 to-orange-100/50 dark:from-orange-900/20 dark:to-orange-800/10 border border-orange-200/50 dark:border-orange-700/50 p-4"
           >
             <div className="flex justify-between items-center">
               <div>
                 <h4 className="text-2xl font-bold text-orange-600 dark:text-orange-400 mb-1">
                   {stats.sansChef}
                 </h4>
-                <small className="text-gray-600 dark:text-gray-400 text-sm">
-                  Sans Chef
-                </small>
+                <small className="text-gray-600 dark:text-gray-400 text-sm">Sans Chef</small>
               </div>
               <div className="text-orange-600 dark:text-orange-400">
                 <AlertCircle className="w-5 h-5" />
@@ -365,7 +341,7 @@ export default function DepartementList() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Recherche Globale */}
               <div className="md:col-span-2">
-                <label className="block text-sm font-bold text-blue-600 dark:text-blue-400 mb-2 md:flex items-center">
+                <label className="block text-sm font-bold text-blue-600 dark:text-blue-400 mb-2 flex items-center">
                   <Search className="w-3.5 h-3.5 mr-1" />
                   Recherche Globale
                 </label>
@@ -393,9 +369,7 @@ export default function DepartementList() {
             {/* Badge de résultats de recherche */}
             {hasActiveFilters && (
               <div className="mt-3 flex items-center gap-2 flex-wrap">
-                <span className="text-xs text-gray-600 dark:text-gray-400">
-                  Filtres actifs:
-                </span>
+                <span className="text-xs text-gray-600 dark:text-gray-400">Filtres actifs:</span>
                 {searchTerm && (
                   <span className="px-2 py-1 bg-blue-500 text-white text-xs font-medium rounded">
                     Recherche: "{searchTerm}"
@@ -417,7 +391,7 @@ export default function DepartementList() {
             {showBulkActions && (
               <motion.div
                 initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
+                animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
                 className="px-6 py-3 bg-[#179150]/10 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between"
               >
@@ -499,10 +473,7 @@ export default function DepartementList() {
                 </thead>
                 <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                   {filteredDepartements.map((dept) => (
-                    <tr
-                      key={dept.id}
-                      className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
-                    >
+                    <tr key={dept.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                       <td className="px-4 py-4 w-12">
                         <input
                           type="checkbox"
@@ -517,18 +488,15 @@ export default function DepartementList() {
                         </div>
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400 hidden md:table-cell">
-                        <div
-                          className="max-w-xs truncate"
-                          title={dept.description || "Aucune description"}
-                        >
-                          {dept.description || "Aucune description"}
+                        <div className="max-w-xs truncate" title={dept.description || 'Aucune description'}>
+                          {dept.description || 'Aucune description'}
                         </div>
                       </td>
                       <td className="px-6 py-4">
                         {dept.chef_info ? (
                           <div className="flex items-center">
                             <div className="w-8 h-8 bg-gradient-to-br from-[#179150] to-[#147a43] rounded-full flex items-center justify-center text-white font-semibold text-xs mr-2">
-                              {dept.chef_info.name?.charAt(0) || "C"}
+                              {dept.chef_info.name?.charAt(0) || 'C'}
                             </div>
                             <div>
                               <div className="text-sm font-medium text-gray-900 dark:text-white">
@@ -588,30 +556,12 @@ export default function DepartementList() {
         </motion.div>
       </div>
 
-      {/* Toast Notification */}
-      <AnimatePresence>
-        {showToast && (
-          <motion.div
-            initial={{ opacity: 0, y: 50, x: "-50%" }}
-            animate={{ opacity: 1, y: 0, x: "-50%" }}
-            exit={{ opacity: 0, y: 50, x: "-50%" }}
-            className={cn(
-              "fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 px-6 py-4 rounded-lg shadow-lg flex items-center gap-3",
-              {
-                "bg-green-500 text-white": toastType === "success",
-                "bg-red-500 text-white": toastType === "error",
-              }
-            )}
-          >
-            {toastType === "success" ? (
-              <CheckCircle className="w-5 h-5" />
-            ) : (
-              <AlertCircle className="w-5 h-5" />
-            )}
-            <span>{toastMessage}</span>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <Toast
+        message={toastMessage}
+        type={toastType}
+        isVisible={showToast}
+        onClose={() => setShowToast(false)}
+      />
 
       {/* Modal de suppression individuelle */}
       <AnimatePresence>
@@ -641,9 +591,8 @@ export default function DepartementList() {
                 </div>
               </div>
               <p className="text-gray-600 dark:text-gray-400 mb-6">
-                Êtes-vous sûr de vouloir supprimer le département{" "}
-                <strong>{departementToDelete?.nom}</strong> ? Cette action est
-                irréversible.
+                Êtes-vous sûr de vouloir supprimer le département <strong>{departementToDelete?.nom}</strong> ?
+                Cette action est irréversible.
               </p>
               <div className="flex justify-end gap-3">
                 <button
@@ -692,8 +641,7 @@ export default function DepartementList() {
                 </div>
               </div>
               <p className="text-gray-600 dark:text-gray-400 mb-6">
-                Êtes-vous sûr de vouloir supprimer{" "}
-                <strong>{selectedDepartements.size} département(s)</strong> ?
+                Êtes-vous sûr de vouloir supprimer <strong>{selectedDepartements.size} département(s)</strong> ?
                 Cette action est irréversible.
               </p>
               <div className="flex justify-end gap-3">
@@ -717,3 +665,4 @@ export default function DepartementList() {
     </SuperAdminLayout>
   );
 }
+

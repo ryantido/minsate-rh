@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import SuperAdminLayout from "@/layouts/SuperAdmin/Layout";
+import SuperAdminLayout from "../../../layouts/SuperAdmin/Layout";
 import {
   ArrowLeft,
   Save,
@@ -19,11 +19,11 @@ import {
   Phone,
   MapPin,
   Calendar,
-  Hash,
+  Hash
 } from "lucide-react";
-import { motion, AnimatePresence } from "motion/react";
-import api from "@/services/api";
-import { cn } from "@/lib/utils";
+import { motion, AnimatePresence } from 'framer-motion';
+import api from "../../../services/api";
+import Toast from "../../../components/ui/Toast";
 
 export default function EmployeCreate() {
   const navigate = useNavigate();
@@ -41,19 +41,19 @@ export default function EmployeCreate() {
 
   const [formData, setFormData] = useState({
     // User fields
-    first_name: "",
-    last_name: "",
-    email: "",
-    password: "",
-    confirm_password: "",
+    first_name: '',
+    last_name: '',
+    email: '',
+    password: '',
+    confirm_password: '',
     // Employe fields
-    matricule: "",
-    date_embauche: "",
-    date_naissance: "",
-    statut: "actif",
-    adresse: "",
-    telephone: "",
-    poste: "",
+    matricule: '',
+    date_embauche: '',
+    date_naissance: '',
+    statut: 'actif',
+    adresse: '',
+    telephone: '',
+    poste: ''
   });
 
   useEffect(() => {
@@ -65,33 +65,31 @@ export default function EmployeCreate() {
       fetchPostesByDepartement(selectedDepartement);
     } else {
       setPostes([]);
-      setFormData((prev) => ({ ...prev, poste: "" }));
+      setFormData(prev => ({ ...prev, poste: '' }));
     }
   }, [selectedDepartement]);
 
   const fetchDepartements = async () => {
     try {
-      const response = await api.get("/users/departements/");
+      const response = await api.get('/users/departements/');
       setDepartements(response.data || []);
     } catch (error) {
-      console.error("Erreur lors du chargement des départements:", error);
+      console.error('Erreur lors du chargement des départements:', error);
     }
   };
 
   const fetchPostesByDepartement = async (deptId) => {
     try {
-      const response = await api.get("/users/postes/");
+      const response = await api.get('/users/postes/');
       const allPostes = response.data || [];
-      const deptPostes = allPostes.filter(
-        (poste) => poste.departement?.toString() === deptId
-      );
+      const deptPostes = allPostes.filter(poste => poste.departement?.toString() === deptId);
       setPostes(deptPostes);
     } catch (error) {
-      console.error("Erreur lors du chargement des postes:", error);
+      console.error('Erreur lors du chargement des postes:', error);
     }
   };
 
-  const showToastMessage = (message, type = "success") => {
+  const showToastMessage = (message, type = 'success') => {
     setToastMessage(message);
     setToastType(type);
     setShowToast(true);
@@ -100,20 +98,20 @@ export default function EmployeCreate() {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
 
-    if (name === "departement") {
+    if (name === 'departement') {
       setSelectedDepartement(value);
-      setFormData((prev) => ({ ...prev, poste: "" }));
+      setFormData(prev => ({ ...prev, poste: '' }));
     } else {
-      setFormData((prev) => ({
+      setFormData(prev => ({
         ...prev,
-        [name]: value,
+        [name]: value
       }));
     }
 
     if (errors[name]) {
-      setErrors((prev) => ({
+      setErrors(prev => ({
         ...prev,
-        [name]: null,
+        [name]: null
       }));
     }
   };
@@ -122,7 +120,7 @@ export default function EmployeCreate() {
     e.preventDefault();
 
     if (formData.password !== formData.confirm_password) {
-      showToastMessage("Les mots de passe ne correspondent pas", error);
+      showToastMessage('Les mots de passe ne correspondent pas', 'error');
       return;
     }
 
@@ -141,27 +139,25 @@ export default function EmployeCreate() {
         // Employe fields
         matricule: formData.matricule,
         date_embauche: formData.date_embauche || null,
-        poste_id: formData.poste ? parseInt(formData.poste) : null,
+        poste_id: formData.poste ? parseInt(formData.poste) : null
       };
 
-      const response = await api.post("/users/employes/", submitData);
+      const response = await api.post('/users/employes/', submitData);
 
       if (response.data) {
-        showToastMessage("Employé créé avec succès !", "success");
+        showToastMessage('Employé créé avec succès !', 'success');
         setTimeout(() => {
-          navigate("/superadmin/employes");
+          navigate('/superadmin/employes');
         }, 2000);
       }
     } catch (err) {
       if (err.response?.data?.errors) {
         setErrors(err.response.data.errors);
-        showToastMessage("Veuillez corriger les erreurs du formulaire", error);
+        showToastMessage('Veuillez corriger les erreurs du formulaire', 'error');
       } else {
-        const errorMsg =
-          err.response?.data?.message ||
-          "Erreur lors de la création de l'employé";
+        const errorMsg = err.response?.data?.message || 'Erreur lors de la création de l\'employé';
         setError(errorMsg);
-        showToastMessage(errorMsg, error);
+        showToastMessage(errorMsg, 'error');
       }
     } finally {
       setSaving(false);
@@ -200,7 +196,7 @@ export default function EmployeCreate() {
           {error && (
             <motion.div
               initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
+              animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
               className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-4 mb-6 rounded-lg"
             >
@@ -255,7 +251,7 @@ export default function EmployeCreate() {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 md:flex items-center">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center">
                         <User className="w-4 h-4 mr-2" />
                         Prénom *
                       </label>
@@ -264,11 +260,10 @@ export default function EmployeCreate() {
                         name="first_name"
                         value={formData.first_name}
                         onChange={handleInputChange}
-                        className={`w-full px-4 py-3 border ${
-                          errors.first_name
-                            ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-                            : "border-gray-300 dark:border-gray-600 focus:border-[#179150] focus:ring-[#179150]"
-                        } bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors duration-200 rounded-lg`}
+                        className={`w-full px-4 py-3 border ${errors.first_name
+                            ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                            : 'border-gray-300 dark:border-gray-600 focus:border-[#179150] focus:ring-[#179150]'
+                          } bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors duration-200 rounded-lg`}
                         placeholder="Prénom de l'employé"
                         required
                       />
@@ -280,7 +275,7 @@ export default function EmployeCreate() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 md:flex items-center">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center">
                         <User className="w-4 h-4 mr-2" />
                         Nom *
                       </label>
@@ -289,11 +284,10 @@ export default function EmployeCreate() {
                         name="last_name"
                         value={formData.last_name}
                         onChange={handleInputChange}
-                        className={cn("w-full px-4 py-3 border",
-                          errors.last_name
-                            ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-                            : "border-gray-300 dark:border-gray-600 focus:border-[#179150] focus:ring-[#179150]",
-                        "bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors duration-200 rounded-lg")}
+                        className={`w-full px-4 py-3 border ${errors.last_name
+                            ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                            : 'border-gray-300 dark:border-gray-600 focus:border-[#179150] focus:ring-[#179150]'
+                          } bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors duration-200 rounded-lg`}
                         placeholder="Nom de l'employé"
                         required
                       />
@@ -305,7 +299,7 @@ export default function EmployeCreate() {
                     </div>
 
                     <div className="md:col-span-2">
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 md:flex items-center">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center">
                         <Mail className="w-4 h-4 mr-2" />
                         Email professionnel *
                       </label>
@@ -314,11 +308,10 @@ export default function EmployeCreate() {
                         name="email"
                         value={formData.email}
                         onChange={handleInputChange}
-                        className={cn("w-full px-4 py-3 border",
-                          errors.email
-                            ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-                            : "border-gray-300 dark:border-gray-600 focus:border-[#179150] focus:ring-[#179150]",
-                       "bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors duration-200 rounded-lg")}
+                        className={`w-full px-4 py-3 border ${errors.email
+                            ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                            : 'border-gray-300 dark:border-gray-600 focus:border-[#179150] focus:ring-[#179150]'
+                          } bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors duration-200 rounded-lg`}
                         placeholder="employe@example.com"
                         required
                       />
@@ -330,7 +323,7 @@ export default function EmployeCreate() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 md:flex items-center">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center">
                         <Lock className="w-4 h-4 mr-2" />
                         Mot de passe *
                       </label>
@@ -340,11 +333,10 @@ export default function EmployeCreate() {
                           name="password"
                           value={formData.password}
                           onChange={handleInputChange}
-                          className={`w-full px-4 py-3 border ${
-                            errors.password
-                              ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-                              : "border-gray-300 dark:border-gray-600 focus:border-[#179150] focus:ring-[#179150]"
-                          } bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors duration-200 rounded-lg pr-10`}
+                          className={`w-full px-4 py-3 border ${errors.password
+                              ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                              : 'border-gray-300 dark:border-gray-600 focus:border-[#179150] focus:ring-[#179150]'
+                            } bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors duration-200 rounded-lg pr-10`}
                           placeholder="Mot de passe sécurisé"
                           required
                         />
@@ -353,11 +345,7 @@ export default function EmployeCreate() {
                           onClick={() => setShowPassword(!showPassword)}
                           className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                         >
-                          {showPassword ? (
-                            <EyeOff className="w-4 h-4" />
-                          ) : (
-                            <Eye className="w-4 h-4" />
-                          )}
+                          {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                         </button>
                       </div>
                       {errors.password && (
@@ -371,7 +359,7 @@ export default function EmployeCreate() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 md:flex items-center">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center">
                         <Lock className="w-4 h-4 mr-2" />
                         Confirmer le mot de passe *
                       </label>
@@ -381,26 +369,19 @@ export default function EmployeCreate() {
                           name="confirm_password"
                           value={formData.confirm_password}
                           onChange={handleInputChange}
-                          className={`w-full px-4 py-3 border ${
-                            errors.confirm_password
-                              ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-                              : "border-gray-300 dark:border-gray-600 focus:border-[#179150] focus:ring-[#179150]"
-                          } bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors duration-200 rounded-lg pr-10`}
+                          className={`w-full px-4 py-3 border ${errors.confirm_password
+                              ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                              : 'border-gray-300 dark:border-gray-600 focus:border-[#179150] focus:ring-[#179150]'
+                            } bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors duration-200 rounded-lg pr-10`}
                           placeholder="Confirmez le mot de passe"
                           required
                         />
                         <button
                           type="button"
-                          onClick={() =>
-                            setShowConfirmPassword(!showConfirmPassword)
-                          }
+                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                           className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                         >
-                          {showConfirmPassword ? (
-                            <EyeOff className="w-4 h-4" />
-                          ) : (
-                            <Eye className="w-4 h-4" />
-                          )}
+                          {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                         </button>
                       </div>
                       {errors.confirm_password && (
@@ -430,7 +411,7 @@ export default function EmployeCreate() {
                 <div className="p-6 space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 md:flex items-center">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center">
                         <Hash className="w-4 h-4 mr-2" />
                         Matricule *
                       </label>
@@ -439,11 +420,10 @@ export default function EmployeCreate() {
                         name="matricule"
                         value={formData.matricule}
                         onChange={handleInputChange}
-                        className={`w-full px-4 py-3 border ${
-                          errors.matricule
-                            ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-                            : "border-gray-300 dark:border-gray-600 focus:border-[#179150] focus:ring-[#179150]"
-                        } bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors duration-200 rounded-lg`}
+                        className={`w-full px-4 py-3 border ${errors.matricule
+                            ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                            : 'border-gray-300 dark:border-gray-600 focus:border-[#179150] focus:ring-[#179150]'
+                          } bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors duration-200 rounded-lg`}
                         placeholder="EMP001"
                         required
                       />
@@ -455,7 +435,7 @@ export default function EmployeCreate() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 md:flex items-center">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center">
                         <Calendar className="w-4 h-4 mr-2" />
                         Date d'embauche *
                       </label>
@@ -464,11 +444,10 @@ export default function EmployeCreate() {
                         name="date_embauche"
                         value={formData.date_embauche}
                         onChange={handleInputChange}
-                        className={`w-full px-4 py-3 border ${
-                          errors.date_embauche
-                            ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-                            : "border-gray-300 dark:border-gray-600 focus:border-[#179150] focus:ring-[#179150]"
-                        } bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors duration-200 rounded-lg`}
+                        className={`w-full px-4 py-3 border ${errors.date_embauche
+                            ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                            : 'border-gray-300 dark:border-gray-600 focus:border-[#179150] focus:ring-[#179150]'
+                          } bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors duration-200 rounded-lg`}
                         required
                       />
                       {errors.date_embauche && (
@@ -479,7 +458,7 @@ export default function EmployeCreate() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 md:flex items-center">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center">
                         <Calendar className="w-4 h-4 mr-2" />
                         Date de naissance
                       </label>
@@ -493,7 +472,7 @@ export default function EmployeCreate() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 md:flex items-center">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center">
                         <Users className="w-4 h-4 mr-2" />
                         Statut *
                       </label>
@@ -512,7 +491,7 @@ export default function EmployeCreate() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 md:flex items-center">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center">
                         <Building2 className="w-4 h-4 mr-2" />
                         Département
                       </label>
@@ -530,13 +509,12 @@ export default function EmployeCreate() {
                         ))}
                       </select>
                       <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                        Sélectionnez d'abord un département pour voir les postes
-                        disponibles
+                        Sélectionnez d'abord un département pour voir les postes disponibles
                       </p>
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 md:flex items-center">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center">
                         <Briefcase className="w-4 h-4 mr-2" />
                         Poste
                       </label>
@@ -562,7 +540,7 @@ export default function EmployeCreate() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 md:flex items-center">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center">
                         <Phone className="w-4 h-4 mr-2" />
                         Téléphone
                       </label>
@@ -577,7 +555,7 @@ export default function EmployeCreate() {
                     </div>
 
                     <div className="md:col-span-2">
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 md:flex items-center">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center">
                         <MapPin className="w-4 h-4 mr-2" />
                         Adresse
                       </label>
@@ -669,28 +647,13 @@ export default function EmployeCreate() {
       </div>
 
       {/* Toast Notification */}
-      <AnimatePresence>
-        {showToast && (
-          <motion.div
-            initial={{ opacity: 0, y: 50, x: "-50%" }}
-            animate={{ opacity: 1, y: 0, x: "-50%" }}
-            exit={{ opacity: 0, y: 50, x: "-50%" }}
-            className={cn(
-              "fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 px-6 py-4 rounded-lg shadow-lg flex items-center gap-3",
-              toastType === "success"
-                ? "bg-green-500 text-white"
-                : "bg-red-500 text-white"
-            )}
-          >
-            {toastType === "success" ? (
-              <CheckCircle className="w-5 h-5" />
-            ) : (
-              <AlertCircle className="w-5 h-5" />
-            )}
-            <span>{toastMessage}</span>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <Toast
+        message={toastMessage}
+        type={toastType}
+        isVisible={showToast}
+        onClose={() => setShowToast(false)}
+      />
     </SuperAdminLayout>
   );
 }
+
