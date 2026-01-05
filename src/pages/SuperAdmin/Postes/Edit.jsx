@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
-import SuperAdminLayout from "@/layouts/SuperAdmin/Layout";
+import SuperAdminLayout from "../../../layouts/SuperAdmin/Layout";
 import {
   ArrowLeft,
   Save,
@@ -11,11 +11,11 @@ import {
   Building2,
   FileText,
   DollarSign,
-  X,
+  X
 } from "lucide-react";
-import { motion, AnimatePresence } from "motion/react";
-import api from "@/services/api";
-import { cn } from "@/lib/utils";
+import { motion, AnimatePresence } from 'framer-motion';
+import api from "../../../services/api";
+import Toast from "../../../components/ui/Toast";
 
 export default function PosteEdit() {
   const { id } = useParams();
@@ -31,10 +31,10 @@ export default function PosteEdit() {
   const [departements, setDepartements] = useState([]);
 
   const [formData, setFormData] = useState({
-    titre: "",
-    description: "",
-    salaire_de_base: "",
-    departement: "",
+    titre: '',
+    description: '',
+    salaire_de_base: '',
+    departement: ''
   });
 
   useEffect(() => {
@@ -50,14 +50,14 @@ export default function PosteEdit() {
       setPoste(posteData);
 
       setFormData({
-        titre: posteData.titre || "",
-        description: posteData.description || "",
-        salaire_de_base: posteData.salaire_de_base?.toString() || "",
-        departement: posteData.departement?.toString() || "",
+        titre: posteData.titre || '',
+        description: posteData.description || '',
+        salaire_de_base: posteData.salaire_de_base?.toString() || '',
+        departement: posteData.departement?.toString() || ''
       });
     } catch (error) {
-      console.error("Erreur lors du chargement du poste:", error);
-      showToastMessage("Erreur lors du chargement du poste", error);
+      console.error('Erreur lors du chargement du poste:', error);
+      showToastMessage('Erreur lors du chargement du poste', 'error');
     } finally {
       setLoading(false);
     }
@@ -65,14 +65,14 @@ export default function PosteEdit() {
 
   const fetchDepartements = async () => {
     try {
-      const response = await api.get("/users/departements/");
+      const response = await api.get('/users/departements/');
       setDepartements(response.data || []);
     } catch (error) {
-      console.error("Erreur lors du chargement des départements:", error);
+      console.error('Erreur lors du chargement des départements:', error);
     }
   };
 
-  const showToastMessage = (message, type = "success") => {
+  const showToastMessage = (message, type = 'success') => {
     setToastMessage(message);
     setToastType(type);
     setShowToast(true);
@@ -81,15 +81,15 @@ export default function PosteEdit() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
+    setFormData(prev => ({
       ...prev,
-      [name]: value,
+      [name]: value
     }));
 
     if (errors[name]) {
-      setErrors((prev) => ({
+      setErrors(prev => ({
         ...prev,
-        [name]: null,
+        [name]: null
       }));
     }
   };
@@ -105,7 +105,7 @@ export default function PosteEdit() {
       const submitData = {
         titre: formData.titre,
         description: formData.description || null,
-        salaire_de_base: parseFloat(formData.salaire_de_base) || 0,
+        salaire_de_base: parseFloat(formData.salaire_de_base) || 0
       };
 
       if (formData.departement) {
@@ -117,22 +117,19 @@ export default function PosteEdit() {
       const response = await api.put(`/users/postes/${id}/`, submitData);
 
       if (response.data) {
-        showToastMessage("Poste modifié avec succès !", "success");
+        showToastMessage('Poste modifié avec succès !', 'success');
         setTimeout(() => {
-          navigate("/superadmin/postes");
+          navigate('/superadmin/postes');
         }, 2000);
       }
     } catch (err) {
       if (err.response?.data?.errors) {
         setErrors(err.response.data.errors);
-        showToastMessage("Veuillez corriger les erreurs du formulaire", error);
+        showToastMessage('Veuillez corriger les erreurs du formulaire', 'error');
       } else {
-        const errorMsg =
-          err.response?.data?.message ||
-          err.response?.data?.error ||
-          "Erreur lors de la modification du poste";
+        const errorMsg = err.response?.data?.message || err.response?.data?.error || 'Erreur lors de la modification du poste';
         setError(errorMsg);
-        showToastMessage(errorMsg, error);
+        showToastMessage(errorMsg, 'error');
       }
     } finally {
       setSaving(false);
@@ -140,7 +137,7 @@ export default function PosteEdit() {
   };
 
   const getInitials = (name) => {
-    if (!name) return "P";
+    if (!name) return 'P';
     return name.charAt(0).toUpperCase();
   };
 
@@ -150,9 +147,7 @@ export default function PosteEdit() {
         <div className="flex items-center justify-center min-h-96">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#179150] mx-auto mb-4"></div>
-            <p className="text-gray-600 dark:text-gray-400">
-              Chargement du poste...
-            </p>
+            <p className="text-gray-600 dark:text-gray-400">Chargement du poste...</p>
           </div>
         </div>
       </SuperAdminLayout>
@@ -191,7 +186,7 @@ export default function PosteEdit() {
           {error && (
             <motion.div
               initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
+              animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
               className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-4 mb-6 rounded-lg"
             >
@@ -230,7 +225,7 @@ export default function PosteEdit() {
                     </div>
                     <div>
                       <h3 className="font-semibold text-gray-900 dark:text-white">
-                        {formData.titre || "Nouveau Poste"}
+                        {formData.titre || 'Nouveau Poste'}
                       </h3>
                       <div className="flex items-center mt-1">
                         <span className="inline-flex items-center px-2 py-1 text-xs font-medium bg-[#179150]/10 text-[#179150] border border-[#179150]/20 rounded">
@@ -246,7 +241,7 @@ export default function PosteEdit() {
                   <div className="space-y-6">
                     {/* Titre */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 md:flex items-center">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center">
                         <Briefcase className="w-4 h-4 mr-2" />
                         Titre du poste *
                       </label>
@@ -255,13 +250,10 @@ export default function PosteEdit() {
                         name="titre"
                         value={formData.titre}
                         onChange={handleInputChange}
-                        className={cn(
-                          "w-full px-4 py-3 border",
-                          errors.titre
-                            ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-                            : "border-gray-300 dark:border-gray-600 focus:border-[#179150] focus:ring-[#179150]",
-                          "bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors duration-200 rounded-lg"
-                        )}
+                        className={`w-full px-4 py-3 border ${errors.titre
+                          ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                          : 'border-gray-300 dark:border-gray-600 focus:border-[#179150] focus:ring-[#179150]'
+                          } bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors duration-200 rounded-lg`}
                         placeholder="Ex: Développeur Full Stack"
                         required
                       />
@@ -274,7 +266,7 @@ export default function PosteEdit() {
 
                     {/* Description */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 md:flex items-center">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center">
                         <FileText className="w-4 h-4 mr-2" />
                         Description
                       </label>
@@ -283,13 +275,10 @@ export default function PosteEdit() {
                         value={formData.description}
                         onChange={handleInputChange}
                         rows={4}
-                        className={cn(
-                          "w-full px-4 py-3 border",
-                          errors.description
-                            ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-                            : "border-gray-300 dark:border-gray-600 focus:border-[#179150] focus:ring-[#179150]",
-                          "bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors duration-200 rounded-lg"
-                        )}
+                        className={`w-full px-4 py-3 border ${errors.description
+                          ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                          : 'border-gray-300 dark:border-gray-600 focus:border-[#179150] focus:ring-[#179150]'
+                          } bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors duration-200 rounded-lg`}
                         placeholder="Description du poste..."
                       />
                       {errors.description && (
@@ -301,7 +290,7 @@ export default function PosteEdit() {
 
                     {/* Département */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 md:flex items-center">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center">
                         <Building2 className="w-4 h-4 mr-2" />
                         Département
                       </label>
@@ -309,9 +298,7 @@ export default function PosteEdit() {
                         name="departement"
                         value={formData.departement}
                         onChange={handleInputChange}
-                        className={cn(
-                          "w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-[#179150] focus:ring-[#179150] transition-colors duration-200 rounded-lg"
-                        )}
+                        className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-[#179150] focus:ring-[#179150] transition-colors duration-200 rounded-lg"
                       >
                         <option value="">Aucun département assigné</option>
                         {departements.map((dept) => (
@@ -332,7 +319,7 @@ export default function PosteEdit() {
 
                     {/* Salaire de base */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 md:flex items-center">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center">
                         <DollarSign className="w-4 h-4 mr-2" />
                         Salaire de base *
                       </label>
@@ -343,13 +330,10 @@ export default function PosteEdit() {
                         onChange={handleInputChange}
                         step="0.01"
                         min="0"
-                        className={cn(
-                          "w-full px-4 py-3 border",
-                          errors.salaire_de_base
-                            ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-                            : "border-gray-300 dark:border-gray-600 focus:border-[#179150] focus:ring-[#179150]",
-                          "bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors duration-200 rounded-lg"
-                        )}
+                        className={`w-full px-4 py-3 border ${errors.salaire_de_base
+                          ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                          : 'border-gray-300 dark:border-gray-600 focus:border-[#179150] focus:ring-[#179150]'
+                          } bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors duration-200 rounded-lg`}
                         placeholder="0.00"
                         required
                       />
@@ -441,29 +425,13 @@ export default function PosteEdit() {
         </form>
       </div>
 
-      {/* Toast Notification */}
-      <AnimatePresence>
-        {showToast && (
-          <motion.div
-            initial={{ opacity: 0, y: 50, x: "-50%" }}
-            animate={{ opacity: 1, y: 0, x: "-50%" }}
-            exit={{ opacity: 0, y: 50, x: "-50%" }}
-            className={cn(
-              "fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 px-6 py-4 rounded-lg shadow-lg flex items-center gap-3",
-              toastType === "success"
-                ? "bg-green-500 text-white"
-                : "bg-red-500 text-white"
-            )}
-          >
-            {toastType === "success" ? (
-              <CheckCircle className="w-5 h-5" />
-            ) : (
-              <AlertCircle className="w-5 h-5" />
-            )}
-            <span>{toastMessage}</span>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <Toast
+        message={toastMessage}
+        type={toastType}
+        isVisible={showToast}
+        onClose={() => setShowToast(false)}
+      />
     </SuperAdminLayout>
   );
 }
+

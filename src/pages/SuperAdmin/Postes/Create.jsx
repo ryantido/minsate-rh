@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import SuperAdminLayout from "@/layouts/SuperAdmin/Layout";
+import SuperAdminLayout from "../../../layouts/SuperAdmin/Layout";
 import {
   ArrowLeft,
   Save,
@@ -11,19 +11,19 @@ import {
   Building2,
   FileText,
   DollarSign,
-  X,
+  X
 } from "lucide-react";
-import { motion, AnimatePresence } from "motion/react";
-import api from "@/services/api";
-import { cn } from "@/lib/utils";
+import { motion, AnimatePresence } from 'framer-motion';
+import api from "../../../services/api";
+import Toast from "../../../components/ui/Toast";
 
 export default function PosteCreate() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    titre: "",
-    description: "",
-    salaire_de_base: "",
-    departement: "",
+    titre: '',
+    description: '',
+    salaire_de_base: '',
+    departement: ''
   });
   const [errors, setErrors] = useState({});
   const [error, setError] = useState(null);
@@ -39,14 +39,14 @@ export default function PosteCreate() {
 
   const fetchDepartements = async () => {
     try {
-      const response = await api.get("/users/departements/");
+      const response = await api.get('/users/departements/');
       setDepartements(response.data || []);
     } catch (error) {
-      console.error("Erreur lors du chargement des départements:", error);
+      console.error('Erreur lors du chargement des départements:', error);
     }
   };
 
-  const showToastMessage = (message, type = "success") => {
+  const showToastMessage = (message, type = 'success') => {
     setToastMessage(message);
     setToastType(type);
     setShowToast(true);
@@ -55,15 +55,15 @@ export default function PosteCreate() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
+    setFormData(prev => ({
       ...prev,
-      [name]: value,
+      [name]: value
     }));
 
     if (errors[name]) {
-      setErrors((prev) => ({
+      setErrors(prev => ({
         ...prev,
-        [name]: null,
+        [name]: null
       }));
     }
   };
@@ -79,32 +79,29 @@ export default function PosteCreate() {
       const submitData = {
         titre: formData.titre,
         description: formData.description || null,
-        salaire_de_base: parseFloat(formData.salaire_de_base) || 0,
+        salaire_de_base: parseFloat(formData.salaire_de_base) || 0
       };
 
       if (formData.departement) {
         submitData.departement = parseInt(formData.departement);
       }
 
-      const response = await api.post("/users/postes/", submitData);
+      const response = await api.post('/users/postes/', submitData);
 
       if (response.data) {
-        showToastMessage("Poste créé avec succès !", "success");
+        showToastMessage('Poste créé avec succès !', 'success');
         setTimeout(() => {
-          navigate("/superadmin/postes");
+          navigate('/superadmin/postes');
         }, 2000);
       }
     } catch (err) {
       if (err.response?.data?.errors) {
         setErrors(err.response.data.errors);
-        showToastMessage("Veuillez corriger les erreurs du formulaire", error);
+        showToastMessage('Veuillez corriger les erreurs du formulaire', 'error');
       } else {
-        const errorMsg =
-          err.response?.data?.message ||
-          err.response?.data?.error ||
-          "Erreur lors de la création du poste";
+        const errorMsg = err.response?.data?.message || err.response?.data?.error || 'Erreur lors de la création du poste';
         setError(errorMsg);
-        showToastMessage(errorMsg, error);
+        showToastMessage(errorMsg, 'error');
       }
     } finally {
       setSaving(false);
@@ -143,7 +140,7 @@ export default function PosteCreate() {
           {error && (
             <motion.div
               initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
+              animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
               className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-4 mb-6 rounded-lg"
             >
@@ -177,7 +174,7 @@ export default function PosteCreate() {
                 <div className="p-6 space-y-6">
                   {/* Titre */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 md:flex items-center">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center">
                       <Briefcase className="w-4 h-4 mr-2" />
                       Titre du poste *
                     </label>
@@ -186,13 +183,10 @@ export default function PosteCreate() {
                       name="titre"
                       value={formData.titre}
                       onChange={handleInputChange}
-                      className={cn(
-                        "w-full px-4 py-3 border",
-                        errors.titre
-                          ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-                          : "border-gray-300 dark:border-gray-600 focus:border-[#179150] focus:ring-[#179150]",
-                        "bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors duration-200 rounded-lg"
-                      )}
+                      className={`w-full px-4 py-3 border ${errors.titre
+                        ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                        : 'border-gray-300 dark:border-gray-600 focus:border-[#179150] focus:ring-[#179150]'
+                        } bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors duration-200 rounded-lg`}
                       placeholder="Ex: Développeur Full Stack"
                       required
                     />
@@ -205,7 +199,7 @@ export default function PosteCreate() {
 
                   {/* Description */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 md:flex items-center">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center">
                       <FileText className="w-4 h-4 mr-2" />
                       Description
                     </label>
@@ -214,13 +208,10 @@ export default function PosteCreate() {
                       value={formData.description}
                       onChange={handleInputChange}
                       rows={4}
-                      className={cn(
-                        "w-full px-4 py-3 border",
-                        errors.description
-                          ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-                          : "border-gray-300 dark:border-gray-600 focus:border-[#179150] focus:ring-[#179150]",
-                        "bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors duration-200 rounded-lg"
-                      )}
+                      className={`w-full px-4 py-3 border ${errors.description
+                        ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                        : 'border-gray-300 dark:border-gray-600 focus:border-[#179150] focus:ring-[#179150]'
+                        } bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors duration-200 rounded-lg`}
                       placeholder="Description du poste..."
                     />
                     {errors.description && (
@@ -232,7 +223,7 @@ export default function PosteCreate() {
 
                   {/* Département */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 md:flex items-center">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center">
                       <Building2 className="w-4 h-4 mr-2" />
                       Département
                     </label>
@@ -240,13 +231,7 @@ export default function PosteCreate() {
                       name="departement"
                       value={formData.departement}
                       onChange={handleInputChange}
-                      className={cn(
-                        "w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-[#179150] focus:ring-[#179150] transition-colors duration-200 rounded-lg",
-                        errors.departement
-                          ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-                          : "border-gray-300 dark:border-gray-600 focus:border-[#179150] focus:ring-[#179150]",
-                        "bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors duration-200 rounded-lg"
-                      )}
+                      className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-[#179150] focus:ring-[#179150] transition-colors duration-200 rounded-lg"
                     >
                       <option value="">Sélectionner un département...</option>
                       {departements.map((dept) => (
@@ -267,7 +252,7 @@ export default function PosteCreate() {
 
                   {/* Salaire de base */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 md:flex items-center">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center">
                       <DollarSign className="w-4 h-4 mr-2" />
                       Salaire de base *
                     </label>
@@ -278,13 +263,10 @@ export default function PosteCreate() {
                       onChange={handleInputChange}
                       step="0.01"
                       min="0"
-                      className={cn(
-                        "w-full px-4 py-3 border",
-                        errors.salaire_de_base
-                          ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-                          : "border-gray-300 dark:border-gray-600 focus:border-[#179150] focus:ring-[#179150]",
-                        "bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors duration-200 rounded-lg"
-                      )}
+                      className={`w-full px-4 py-3 border ${errors.salaire_de_base
+                        ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                        : 'border-gray-300 dark:border-gray-600 focus:border-[#179150] focus:ring-[#179150]'
+                        } bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors duration-200 rounded-lg`}
                       placeholder="0.00"
                       required
                     />
@@ -381,29 +363,13 @@ export default function PosteCreate() {
         </form>
       </div>
 
-      {/* Toast Notification */}
-      <AnimatePresence>
-        {showToast && (
-          <motion.div
-            initial={{ opacity: 0, y: 50, x: "-50%" }}
-            animate={{ opacity: 1, y: 0, x: "-50%" }}
-            exit={{ opacity: 0, y: 50, x: "-50%" }}
-            className={cn(
-              "fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 px-6 py-4 rounded-lg shadow-lg flex items-center gap-3",
-              toastType === "success"
-                ? "bg-green-500 text-white"
-                : "bg-red-500 text-white"
-            )}
-          >
-            {toastType === "success" ? (
-              <CheckCircle className="w-5 h-5" />
-            ) : (
-              <AlertCircle className="w-5 h-5" />
-            )}
-            <span>{toastMessage}</span>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <Toast
+        message={toastMessage}
+        type={toastType}
+        isVisible={showToast}
+        onClose={() => setShowToast(false)}
+      />
     </SuperAdminLayout>
   );
 }
+

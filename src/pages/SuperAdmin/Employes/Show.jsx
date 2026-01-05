@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
-import SuperAdminLayout from "@/layouts/SuperAdmin/Layout";
+import SuperAdminLayout from "../../../layouts/SuperAdmin/Layout";
 import {
   ArrowLeft,
   Edit,
@@ -8,7 +8,9 @@ import {
   Users,
   Mail,
   Calendar,
+  UserCheck,
   CheckCircle,
+  X,
   Settings,
   Activity,
   AlertCircle,
@@ -20,10 +22,12 @@ import {
   Hash,
   Clock,
   Key,
+  Database,
+  UserX
 } from "lucide-react";
-import { motion, AnimatePresence } from "motion/react";
-import api from "@/services/api";
-import { cn, getInitials, getStatutBadge } from "@/lib/utils";
+import { motion, AnimatePresence } from 'framer-motion';
+import api from "../../../services/api";
+import Toast from "../../../components/ui/Toast";
 
 export default function EmployeShow() {
   const { id } = useParams();
@@ -45,14 +49,14 @@ export default function EmployeShow() {
       const response = await api.get(`/users/employe-profiles/${id}/`);
       setEmploye(response.data);
     } catch (error) {
-      console.error("Erreur lors du chargement:", error);
-      showToastMessage("Erreur lors du chargement des données", error);
+      console.error('Erreur lors du chargement:', error);
+      showToastMessage('Erreur lors du chargement des données', 'error');
     } finally {
       setLoading(false);
     }
   };
 
-  const showToastMessage = (message, type = "success") => {
+  const showToastMessage = (message, type = 'success') => {
     setToastMessage(message);
     setToastType(type);
     setShowToast(true);
@@ -61,40 +65,51 @@ export default function EmployeShow() {
   const handleDelete = async () => {
     try {
       await api.delete(`/users/employe-profiles/${id}/`);
-      showToastMessage("Employé supprimé avec succès", "success");
+      showToastMessage('Employé supprimé avec succès', 'success');
       setTimeout(() => {
-        navigate("/superadmin/employes");
+        navigate('/superadmin/employes');
       }, 2000);
     } catch (error) {
-      console.error("Erreur lors de la suppression:", error);
-      const errorMsg =
-        error.response?.data?.message ||
-        error.response?.data?.error ||
-        "Erreur lors de la suppression";
-      showToastMessage(errorMsg, error);
+      console.error('Erreur lors de la suppression:', error);
+      const errorMsg = error.response?.data?.message || error.response?.data?.error || 'Erreur lors de la suppression';
+      showToastMessage(errorMsg, 'error');
     } finally {
       setShowDeleteModal(false);
     }
   };
 
   const formatDate = (dateString) => {
-    if (!dateString) return "Non renseigné";
-    return new Date(dateString).toLocaleDateString("fr-FR", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
+    if (!dateString) return 'Non renseigné';
+    return new Date(dateString).toLocaleDateString('fr-FR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
     });
   };
 
   const formatDateShort = (dateString) => {
-    if (!dateString) return "Non renseigné";
-    return new Date(dateString).toLocaleDateString("fr-FR", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
+    if (!dateString) return 'Non renseigné';
+    return new Date(dateString).toLocaleDateString('fr-FR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
     });
+  };
+
+  const getStatutBadge = (statut) => {
+    const badges = {
+      'actif': { bg: 'bg-green-100 dark:bg-green-900/30', text: 'text-green-800 dark:text-green-400', icon: UserCheck, label: 'Actif' },
+      'inactif': { bg: 'bg-gray-100 dark:bg-gray-700', text: 'text-gray-800 dark:text-gray-300', icon: UserX, label: 'Inactif' },
+      'suspendu': { bg: 'bg-orange-100 dark:bg-orange-900/30', text: 'text-orange-800 dark:text-orange-400', icon: AlertCircle, label: 'Suspendu' },
+      'congé': { bg: 'bg-blue-100 dark:bg-blue-900/30', text: 'text-blue-800 dark:text-blue-400', icon: Calendar, label: 'En congé' }
+    };
+    return badges[statut] || badges['inactif'];
+  };
+
+  const getInitials = (firstName, lastName) => {
+    return `${firstName?.charAt(0) || ''}${lastName?.charAt(0) || ''}`.toUpperCase();
   };
 
   if (loading) {
@@ -103,9 +118,7 @@ export default function EmployeShow() {
         <div className="flex items-center justify-center min-h-96">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#179150] mx-auto mb-4"></div>
-            <p className="text-gray-600 dark:text-gray-400">
-              Chargement de l'employé...
-            </p>
+            <p className="text-gray-600 dark:text-gray-400">Chargement de l'employé...</p>
           </div>
         </div>
       </SuperAdminLayout>
@@ -197,19 +210,15 @@ export default function EmployeShow() {
                       <div
                         className="rounded-lg border-4 border-[#179150] flex items-center justify-center"
                         style={{
-                          width: "120px",
-                          height: "120px",
-                          background:
-                            "linear-gradient(135deg, #179150 0%, #147a43 100%)",
-                          color: "white",
-                          fontSize: "3rem",
-                          fontWeight: "700",
+                          width: '120px',
+                          height: '120px',
+                          background: 'linear-gradient(135deg, #179150 0%, #147a43 100%)',
+                          color: 'white',
+                          fontSize: '3rem',
+                          fontWeight: '700'
                         }}
                       >
-                        {getInitials(
-                          employe.user?.first_name,
-                          employe.user?.last_name
-                        )}
+                        {getInitials(employe.user?.first_name, employe.user?.last_name)}
                       </div>
                       <span className="absolute -bottom-2 -right-2 bg-[#179150] text-white p-2 border-2 border-white dark:border-gray-800 rounded-lg">
                         <Users className="w-4 h-4" />
@@ -221,14 +230,8 @@ export default function EmployeShow() {
                       {employe.user?.first_name} {employe.user?.last_name}
                     </h4>
                     <div className="flex flex-wrap gap-2 items-center">
-                      <span className="px-3 py-1 bg-[#179150] text-white text-sm font-medium rounded">
-                        Employé
-                      </span>
-                      <span
-                        className={cn(
-                          "inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${statutBadge.bg} ${statutBadge.text}"
-                        )}
-                      >
+                      <span className="px-3 py-1 bg-[#179150] text-white text-sm font-medium rounded">Employé</span>
+                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${statutBadge.bg} ${statutBadge.text}`}>
                         <StatutIcon className="w-3 h-3 mr-1" />
                         {statutBadge.label}
                       </span>
@@ -257,36 +260,28 @@ export default function EmployeShow() {
                             <Hash className="w-4 h-4 mr-2" />
                             Matricule :
                           </span>
-                          <span className="font-medium text-gray-900 dark:text-white">
-                            {employe.matricule}
-                          </span>
+                          <span className="font-medium text-gray-900 dark:text-white">{employe.matricule}</span>
                         </div>
                         <div className="flex justify-between items-center py-3 border-b border-gray-200 dark:border-gray-700">
                           <span className="text-gray-600 dark:text-gray-400 flex items-center">
                             <User className="w-4 h-4 mr-2" />
                             Prénom :
                           </span>
-                          <span className="font-medium text-gray-900 dark:text-white">
-                            {employe.user?.first_name}
-                          </span>
+                          <span className="font-medium text-gray-900 dark:text-white">{employe.user?.first_name}</span>
                         </div>
                         <div className="flex justify-between items-center py-3 border-b border-gray-200 dark:border-gray-700">
                           <span className="text-gray-600 dark:text-gray-400 flex items-center">
                             <User className="w-4 h-4 mr-2" />
                             Nom :
                           </span>
-                          <span className="font-medium text-gray-900 dark:text-white">
-                            {employe.user?.last_name}
-                          </span>
+                          <span className="font-medium text-gray-900 dark:text-white">{employe.user?.last_name}</span>
                         </div>
                         <div className="flex justify-between items-center py-3 border-b border-gray-200 dark:border-gray-700">
                           <span className="text-gray-600 dark:text-gray-400 flex items-center">
                             <Mail className="w-4 h-4 mr-2" />
                             Email :
                           </span>
-                          <span className="font-medium text-gray-900 dark:text-white">
-                            {employe.user?.email}
-                          </span>
+                          <span className="font-medium text-gray-900 dark:text-white">{employe.user?.email}</span>
                         </div>
                       </div>
 
@@ -297,9 +292,7 @@ export default function EmployeShow() {
                               <Phone className="w-4 h-4 mr-2" />
                               Téléphone :
                             </span>
-                            <span className="font-medium text-gray-900 dark:text-white">
-                              {employe.telephone}
-                            </span>
+                            <span className="font-medium text-gray-900 dark:text-white">{employe.telephone}</span>
                           </div>
                         )}
                         {employe.date_naissance && (
@@ -308,9 +301,7 @@ export default function EmployeShow() {
                               <Calendar className="w-4 h-4 mr-2" />
                               Date de naissance :
                             </span>
-                            <span className="font-medium text-gray-900 dark:text-white">
-                              {formatDateShort(employe.date_naissance)}
-                            </span>
+                            <span className="font-medium text-gray-900 dark:text-white">{formatDateShort(employe.date_naissance)}</span>
                           </div>
                         )}
                         <div className="flex justify-between items-center py-3 border-b border-gray-200 dark:border-gray-700">
@@ -318,9 +309,7 @@ export default function EmployeShow() {
                             <Calendar className="w-4 h-4 mr-2" />
                             Date d'embauche :
                           </span>
-                          <span className="font-medium text-gray-900 dark:text-white">
-                            {formatDateShort(employe.date_embauche)}
-                          </span>
+                          <span className="font-medium text-gray-900 dark:text-white">{formatDateShort(employe.date_embauche)}</span>
                         </div>
                         {employe.adresse && (
                           <div className="flex justify-between items-start py-3 border-b border-gray-200 dark:border-gray-700">
@@ -384,9 +373,9 @@ export default function EmployeShow() {
                         </p>
                         {employe.poste_details.salaire_de_base && (
                           <p className="text-sm font-semibold text-green-600 dark:text-green-400 mt-1">
-                            {new Intl.NumberFormat("fr-FR", {
-                              style: "currency",
-                              currency: "XAF",
+                            {new Intl.NumberFormat('fr-FR', {
+                              style: 'currency',
+                              currency: 'XAF'
                             }).format(employe.poste_details.salaire_de_base)}
                           </p>
                         )}
@@ -408,9 +397,7 @@ export default function EmployeShow() {
               className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm"
             >
               <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-                <h4 className="text-sm font-semibold text-gray-900 dark:text-white">
-                  Actions rapides
-                </h4>
+                <h4 className="text-sm font-semibold text-gray-900 dark:text-white">Actions rapides</h4>
               </div>
               <div className="p-4 space-y-2">
                 <Link
@@ -463,45 +450,29 @@ export default function EmployeShow() {
                 <div className="flex items-start">
                   <Key className="w-4 h-4 text-gray-600 mr-2 mt-1" />
                   <div>
-                    <div className="font-medium text-gray-900 dark:text-white">
-                      ID Employé
-                    </div>
-                    <div className="text-gray-600 dark:text-gray-400 font-mono">
-                      {employe.id}
-                    </div>
+                    <div className="font-medium text-gray-900 dark:text-white">ID Employé</div>
+                    <div className="text-gray-600 dark:text-gray-400 font-mono">{employe.id}</div>
                   </div>
                 </div>
                 <div className="flex items-start">
                   <Calendar className="w-4 h-4 text-gray-600 mr-2 mt-1" />
                   <div>
-                    <div className="font-medium text-gray-900 dark:text-white">
-                      Date de création
-                    </div>
-                    <div className="text-gray-600 dark:text-gray-400">
-                      {formatDate(employe.created_at)}
-                    </div>
+                    <div className="font-medium text-gray-900 dark:text-white">Date de création</div>
+                    <div className="text-gray-600 dark:text-gray-400">{formatDate(employe.created_at)}</div>
                   </div>
                 </div>
                 <div className="flex items-start">
                   <Clock className="w-4 h-4 text-gray-600 mr-2 mt-1" />
                   <div>
-                    <div className="font-medium text-gray-900 dark:text-white">
-                      Dernière modification
-                    </div>
-                    <div className="text-gray-600 dark:text-gray-400">
-                      {formatDate(employe.updated_at)}
-                    </div>
+                    <div className="font-medium text-gray-900 dark:text-white">Dernière modification</div>
+                    <div className="text-gray-600 dark:text-gray-400">{formatDate(employe.updated_at)}</div>
                   </div>
                 </div>
                 <div className="flex items-start">
                   <Activity className="w-4 h-4 text-gray-600 mr-2 mt-1" />
                   <div>
-                    <div className="font-medium text-gray-900 dark:text-white">
-                      Statut
-                    </div>
-                    <span
-                      className={`inline-flex items-center px-2 py-1 text-xs font-medium rounded-full ${statutBadge.bg} ${statutBadge.text}`}
-                    >
+                    <div className="font-medium text-gray-900 dark:text-white">Statut</div>
+                    <span className={`inline-flex items-center px-2 py-1 text-xs font-medium rounded-full ${statutBadge.bg} ${statutBadge.text}`}>
                       <StatutIcon className="w-3 h-3 mr-1" />
                       {statutBadge.label}
                     </span>
@@ -514,28 +485,12 @@ export default function EmployeShow() {
       </div>
 
       {/* Toast Notification */}
-      <AnimatePresence>
-        {showToast && (
-          <motion.div
-            initial={{ opacity: 0, y: 50, x: "-50%" }}
-            animate={{ opacity: 1, y: 0, x: "-50%" }}
-            exit={{ opacity: 0, y: 50, x: "-50%" }}
-            className={cn(
-              "fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 px-6 py-4 rounded-lg shadow-lg flex items-center gap-3",
-              toastType === "success"
-                ? "bg-green-500 text-white"
-                : "bg-red-500 text-white"
-            )}
-          >
-            {toastType === "success" ? (
-              <CheckCircle className="w-5 h-5" />
-            ) : (
-              <AlertCircle className="w-5 h-5" />
-            )}
-            <span>{toastMessage}</span>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <Toast
+        message={toastMessage}
+        type={toastType}
+        isVisible={showToast}
+        onClose={() => setShowToast(false)}
+      />
 
       {/* Modal de suppression */}
       <AnimatePresence>
@@ -565,11 +520,8 @@ export default function EmployeShow() {
                 </div>
               </div>
               <p className="text-gray-600 dark:text-gray-400 mb-6">
-                Êtes-vous sûr de vouloir supprimer l'employé{" "}
-                <strong>
-                  {employe.user?.first_name} {employe.user?.last_name}
-                </strong>{" "}
-                ? Cette action est irréversible.
+                Êtes-vous sûr de vouloir supprimer l'employé <strong>{employe.user?.first_name} {employe.user?.last_name}</strong> ?
+                Cette action est irréversible.
               </p>
               <div className="flex justify-end gap-3">
                 <button
@@ -592,3 +544,4 @@ export default function EmployeShow() {
     </SuperAdminLayout>
   );
 }
+

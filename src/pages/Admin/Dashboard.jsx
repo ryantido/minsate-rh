@@ -1,17 +1,40 @@
 import React, { useState, useEffect } from "react";
+import { useAuth } from "../../contexts/AuthContext";
 import {
-  LogOut,
   Users,
-  BarChart3,
   FileText,
   Calendar,
   TrendingUp,
   Bell,
+  CheckCircle,
+  Clock,
+  Briefcase
 } from "lucide-react";
-import { useAuth } from "@/hooks";
-import api from "@/services/api";
-import { AdminDashboardMenu } from "@/constants";
-import { cn } from "@/lib/utils";
+import api from "../../services/api";
+import AdminLayout from "../../layouts/Admin/Layout";
+import { motion } from "framer-motion";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement
+} from 'chart.js';
+import { Bar, Doughnut } from 'react-chartjs-2';
+
+// Enregistrer les composants ChartJS
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement
+);
 
 const AdminDashboard = () => {
   const { user } = useAuth();
@@ -126,63 +149,25 @@ const AdminDashboard = () => {
                 <Users className="w-6 h-6" />
               </div>
             </div>
-
-            <div className="flex items-center space-x-4">
-              <div className="text-right">
-                <p className="text-sm font-medium text-gray-900 dark:text-white">
-                  {user?.first_name} {user?.last_name}
-                </p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Administrateur RH
-                </p>
-              </div>
-              <button
-                onClick={handleLogout}
-                className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition-colors"
-              >
-                <LogOut className="h-4 w-4 mr-2" />
-                Déconnexion
-              </button>
+            <div className="mt-4 flex items-center text-sm text-green-600">
+              <TrendingUp className="w-4 h-4 mr-1" />
+              <span>+2 ce mois</span>
             </div>
-          </div>
-        </div>
-      </header>
+          </motion.div>
 
-      <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="px-4 py-6 sm:px-0">
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-            {/* Sidebar */}
-            <div className="lg:col-span-1">
-              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
-                <div className="text-center mb-6">
-                  <div className="w-20 h-20 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <UserCheck className="h-10 w-10 text-green-600 dark:text-green-400" />
-                  </div>
-                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                    {user?.first_name} {user?.last_name}
-                  </h2>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    Administrateur RH
-                  </p>
-                </div>
-
-                <nav className="space-y-2">
-                  {AdminDashboardMenu.map((item) => (
-                    <button
-                      key={item.id}
-                      onClick={() => setActiveTab(item.id)}
-                      className={cn(
-                        "w-full flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors",
-                        activeTab === item.id
-                          ? "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300"
-                          : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700"
-                      )}
-                    >
-                      <item.icon className="h-4 w-4 mr-3" />
-                      {item.name}
-                    </button>
-                  ))}
-                </nav>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.1 }}
+            className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border-l-4 border-green-500"
+          >
+            <div className="flex justify-between items-start">
+              <div>
+                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Employés Actifs</p>
+                <h3 className="text-3xl font-bold text-gray-900 dark:text-white mt-2">{stats?.employes?.actifs || 0}</h3>
+              </div>
+              <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg text-green-600">
+                <CheckCircle className="w-6 h-6" />
               </div>
             </div>
             <div className="mt-4 text-sm text-gray-500">
@@ -245,88 +230,16 @@ const AdminDashboard = () => {
             </div>
           </motion.div>
 
-                  <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-purple-800 dark:text-purple-300">
-                          Postes
-                        </p>
-                        <p className="text-2xl font-bold text-purple-900 dark:text-purple-200">
-                          {stats?.postes || 0}
-                        </p>
-                      </div>
-                      <FileText className="h-8 w-8 text-purple-600 dark:text-purple-400" />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Informations utilisateur */}
-                <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-6 mb-6">
-                  <h4 className="text-md font-semibold text-gray-900 dark:text-white mb-4">
-                    Mon Profil Administrateur
-                  </h4>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        Email
-                      </p>
-                      <p className="text-sm font-medium text-gray-900 dark:text-white">
-                        {user?.email}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        Rôle
-                      </p>
-                      <p className="text-sm font-medium text-gray-900 dark:text-white">
-                        Administrateur RH
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        Date de création
-                      </p>
-                      <p className="text-sm font-medium text-gray-900 dark:text-white">
-                        {user?.created_at
-                          ? new Date(user.created_at).toLocaleDateString()
-                          : "Non spécifiée"}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Actions rapides */}
-                <div>
-                  <h4 className="text-md font-semibold text-gray-900 dark:text-white mb-4">
-                    Gestion Rapide
-                  </h4>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <button className="bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-4 text-center hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
-                      <Users className="h-6 w-6 text-blue-600 dark:text-blue-400 mx-auto mb-2" />
-                      <span className="text-sm font-medium text-gray-900 dark:text-white">
-                        Ajouter Employé
-                      </span>
-                    </button>
-                    <button className="bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-4 text-center hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
-                      <Calendar className="h-6 w-6 text-orange-600 dark:text-orange-400 mx-auto mb-2" />
-                      <span className="text-sm font-medium text-gray-900 dark:text-white">
-                        Valider Congés
-                      </span>
-                    </button>
-                    <button className="bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-4 text-center hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
-                      <FileText className="h-6 w-6 text-green-600 dark:text-green-400 mx-auto mb-2" />
-                      <span className="text-sm font-medium text-gray-900 dark:text-white">
-                        Générer Rapport
-                      </span>
-                    </button>
-                    <button className="bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-4 text-center hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
-                      <Bell className="h-6 w-6 text-purple-600 dark:text-purple-400 mx-auto mb-2" />
-                      <span className="text-sm font-medium text-gray-900 dark:text-white">
-                        Notifications
-                      </span>
-                    </button>
-                  </div>
-                </div>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.4, delay: 0.5 }}
+            className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6"
+          >
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Répartition des Absences</h3>
+            <div className="h-64 flex justify-center">
+              <div className="w-2/3">
+                <Doughnut data={leaveData} options={{ maintainAspectRatio: false }} />
               </div>
             </div>
           </motion.div>

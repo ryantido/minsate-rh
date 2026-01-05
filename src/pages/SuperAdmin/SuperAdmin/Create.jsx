@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import SuperAdminLayout from "@/layouts/SuperAdmin/Layout";
+import SuperAdminLayout from "../../../layouts/SuperAdmin/Layout";
 import {
   ArrowLeft,
   Save,
@@ -13,13 +13,13 @@ import {
   HelpCircle,
   Eye,
   EyeOff,
-  Shield,
+  Shield
 } from "lucide-react";
-import { motion, AnimatePresence } from "motion/react";
-import api from "@/services/api";
-import { cn } from "@/lib/utils";
+import { motion, AnimatePresence } from 'framer-motion';
+import api from "../../../services/api";
+import Toast from "../../../components/ui/Toast";
 
-export default function SuperAdminCreate() {
+export default function AdminCreate() {
   const navigate = useNavigate();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
@@ -31,14 +31,14 @@ export default function SuperAdminCreate() {
   const [toastType, setToastType] = useState("success");
 
   const [formData, setFormData] = useState({
-    first_name: "",
-    last_name: "",
-    email: "",
-    password: "",
-    confirm_password: "",
+    first_name: '',
+    last_name: '',
+    email: '',
+    password: '',
+    confirm_password: ''
   });
 
-  const showToastMessage = (message, type = "success") => {
+  const showToastMessage = (message, type = 'success') => {
     setToastMessage(message);
     setToastType(type);
     setShowToast(true);
@@ -47,24 +47,28 @@ export default function SuperAdminCreate() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
+    setFormData(prev => ({
       ...prev,
-      [name]: value,
+      [name]: value
     }));
 
     if (errors[name]) {
-      setErrors((prev) => ({
+      setErrors(prev => ({
         ...prev,
-        [name]: null,
+        [name]: null
       }));
     }
+  };
+
+  const getInitials = (firstName, lastName) => {
+    return `${firstName?.charAt(0) || ''}${lastName?.charAt(0) || ''}`.toUpperCase();
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (formData.password !== formData.confirm_password) {
-      showToastMessage("Les mots de passe ne correspondent pas", error);
+      showToastMessage('Les mots de passe ne correspondent pas', 'error');
       return;
     }
 
@@ -73,29 +77,27 @@ export default function SuperAdminCreate() {
       setError(null);
       setErrors({});
 
-      const response = await api.post("/users/superadmins/", {
+      const response = await api.post('/users/superadmins/', {
         first_name: formData.first_name,
         last_name: formData.last_name,
         email: formData.email,
-        password: formData.password,
+        password: formData.password
       });
 
       if (response.data) {
-        showToastMessage("Super Administrateur créé avec succès !", "success");
+        showToastMessage('Super Administrateur créé avec succès !', 'success');
         setTimeout(() => {
-          navigate("/superadmin/super-admins");
+          navigate('/superadmin/super-admins');
         }, 2000);
       }
     } catch (err) {
       if (err.response?.data?.errors) {
         setErrors(err.response.data.errors);
-        showToastMessage("Veuillez corriger les erreurs du formulaire", error);
+        showToastMessage('Veuillez corriger les erreurs du formulaire', 'error');
       } else {
-        const errorMsg =
-          err.response?.data?.message ||
-          "Erreur lors de la création du super administrateur";
+        const errorMsg = err.response?.data?.message || 'Erreur lors de la création du super administrateur';
         setError(errorMsg);
-        showToastMessage(errorMsg, error);
+        showToastMessage(errorMsg, 'error');
       }
     } finally {
       setSaving(false);
@@ -135,7 +137,7 @@ export default function SuperAdminCreate() {
         {error && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
+            animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-4 mb-6"
           >
@@ -190,7 +192,7 @@ export default function SuperAdminCreate() {
                 {/* Champs du formulaire */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 md:flex items-center">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center">
                       <User className="w-4 h-4 mr-2" />
                       Prénom *
                     </label>
@@ -199,12 +201,10 @@ export default function SuperAdminCreate() {
                       name="first_name"
                       value={formData.first_name}
                       onChange={handleInputChange}
-                      className={cn(
-                        "w-full px-4 py-3 border",
-                        errors.first_name
-                          ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-                          : "border-gray-300 dark:border-gray-600 focus:border-[#179150] focus:ring-[#179150]"
-                      )}
+                      className={`w-full px-4 py-3 border ${errors.first_name
+                        ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                        : 'border-gray-300 dark:border-gray-600 focus:border-[#179150] focus:ring-[#179150]'
+                        } bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors duration-200 rounded-lg`}
                       placeholder="Prénom de l'admin"
                       required
                     />
@@ -216,7 +216,7 @@ export default function SuperAdminCreate() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 md:flex items-center">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center">
                       <User className="w-4 h-4 mr-2" />
                       Nom *
                     </label>
@@ -225,12 +225,10 @@ export default function SuperAdminCreate() {
                       name="last_name"
                       value={formData.last_name}
                       onChange={handleInputChange}
-                      className={cn(
-                        "w-full px-4 py-3 border",
-                        errors.last_name
-                          ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-                          : "border-gray-300 dark:border-gray-600 focus:border-[#179150] focus:ring-[#179150]"
-                      )}
+                      className={`w-full px-4 py-3 border ${errors.last_name
+                        ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                        : 'border-gray-300 dark:border-gray-600 focus:border-[#179150] focus:ring-[#179150]'
+                        } bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors duration-200 rounded-lg`}
                       placeholder="Nom de l'admin"
                       required
                     />
@@ -242,7 +240,7 @@ export default function SuperAdminCreate() {
                   </div>
 
                   <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 md:flex items-center">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center">
                       <Mail className="w-4 h-4 mr-2" />
                       Email professionnel *
                     </label>
@@ -251,12 +249,10 @@ export default function SuperAdminCreate() {
                       name="email"
                       value={formData.email}
                       onChange={handleInputChange}
-                      className={cn(
-                        "w-full px-4 py-3 border",
-                        errors.email
-                          ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-                          : "border-gray-300 dark:border-gray-600 focus:border-[#179150] focus:ring-[#179150]"
-                      )}
+                      className={`w-full px-4 py-3 border ${errors.email
+                        ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                        : 'border-gray-300 dark:border-gray-600 focus:border-[#179150] focus:ring-[#179150]'
+                        } bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors duration-200 rounded-lg`}
                       placeholder="admin@minsante.com"
                       required
                     />
@@ -266,6 +262,7 @@ export default function SuperAdminCreate() {
                       </p>
                     )}
                   </div>
+
                 </div>
 
                 <hr className="my-4" />
@@ -273,7 +270,7 @@ export default function SuperAdminCreate() {
                 {/* Section mot de passe */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 md:flex items-center">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center">
                       <Lock className="w-4 h-4 mr-2" />
                       Mot de passe *
                     </label>
@@ -283,12 +280,10 @@ export default function SuperAdminCreate() {
                         name="password"
                         value={formData.password}
                         onChange={handleInputChange}
-                        className={cn(
-                          "w-full px-4 py-3 border",
-                          errors.password
-                            ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-                            : "border-gray-300 dark:border-gray-600 focus:border-[#179150] focus:ring-[#179150]"
-                        )}
+                        className={`w-full px-4 py-3 border ${errors.password
+                          ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                          : 'border-gray-300 dark:border-gray-600 focus:border-[#179150] focus:ring-[#179150]'
+                          } bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors duration-200 rounded-lg`}
                         placeholder="Mot de passe sécurisé"
                         required
                       />
@@ -297,11 +292,7 @@ export default function SuperAdminCreate() {
                         onClick={() => setShowPassword(!showPassword)}
                         className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                       >
-                        {showPassword ? (
-                          <EyeOff className="w-4 h-4" />
-                        ) : (
-                          <Eye className="w-4 h-4" />
-                        )}
+                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </button>
                     </div>
                     {errors.password && (
@@ -310,13 +301,12 @@ export default function SuperAdminCreate() {
                       </p>
                     )}
                     <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                      Minimum 8 caractères avec majuscules, minuscules et
-                      chiffres
+                      Minimum 8 caractères avec majuscules, minuscules et chiffres
                     </p>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 md:flex items-center">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center">
                       <Lock className="w-4 h-4 mr-2" />
                       Confirmer le mot de passe *
                     </label>
@@ -326,27 +316,19 @@ export default function SuperAdminCreate() {
                         name="confirm_password"
                         value={formData.confirm_password}
                         onChange={handleInputChange}
-                        className={cn(
-                          "w-full px-4 py-3 border",
-                          errors.confirm_password
-                            ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-                            : "border-gray-300 dark:border-gray-600 focus:border-[#179150] focus:ring-[#179150]"
-                        )}
+                        className={`w-full px-4 py-3 border ${errors.confirm_password
+                          ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                          : 'border-gray-300 dark:border-gray-600 focus:border-[#179150] focus:ring-[#179150]'
+                          } bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors duration-200 rounded-lg`}
                         placeholder="Confirmez le mot de passe"
                         required
                       />
                       <button
                         type="button"
-                        onClick={() =>
-                          setShowConfirmPassword(!showConfirmPassword)
-                        }
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                         className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                       >
-                        {showConfirmPassword ? (
-                          <EyeOff className="w-4 h-4" />
-                        ) : (
-                          <Eye className="w-4 h-4" />
-                        )}
+                        {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </button>
                     </div>
                     {errors.confirm_password && (
@@ -366,17 +348,11 @@ export default function SuperAdminCreate() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                     <div>
                       <span className="text-[#179150] font-medium">Rôle :</span>
-                      <span className="ml-2 text-[#147a43] font-semibold">
-                        Super Administrateur
-                      </span>
+                      <span className="ml-2 text-[#147a43] font-semibold">Super Administrateur</span>
                     </div>
                     <div>
-                      <span className="text-[#179150] font-medium">
-                        Statut :
-                      </span>
-                      <span className="ml-2 text-[#147a43] font-semibold">
-                        Activé automatiquement
-                      </span>
+                      <span className="text-[#179150] font-medium">Statut :</span>
+                      <span className="ml-2 text-[#147a43] font-semibold">Activé automatiquement</span>
                     </div>
                   </div>
                 </div>
@@ -431,8 +407,7 @@ export default function SuperAdminCreate() {
                 <div className="flex items-start">
                   <CheckCircle className="w-4 h-4 text-[#179150] mr-3 mt-1 flex-shrink-0" />
                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Les administrateurs système ont accès à toutes les
-                    fonctionnalités de la plateforme
+                    Les administrateurs système ont accès à toutes les fonctionnalités de la plateforme
                   </p>
                 </div>
                 <div className="flex items-start">
@@ -500,54 +475,12 @@ export default function SuperAdminCreate() {
         </div>
       </form>
 
-      {/* Notifications Toast */}
-      <AnimatePresence>
-        {showToast && (
-          <motion.div
-            initial={{ opacity: 0, x: 100 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 100 }}
-            className="fixed bottom-4 right-4 z-50"
-          >
-            <div
-              className={cn(
-                "border",
-                toastType === "success"
-                  ? "bg-[#179150]/10 border-[#179150]/20"
-                  : "bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-800",
-                "p-4 max-w-sm"
-              )}
-            >
-              <div className="flex items-center">
-                <div
-                  className={cn(
-                    "flex-shrink-0",
-                    toastType === "success" ? "text-[#179150]" : "text-red-600"
-                  )}
-                >
-                  {toastType === "success" ? (
-                    <CheckCircle className="w-5 h-5" />
-                  ) : (
-                    <AlertCircle className="w-5 h-5" />
-                  )}
-                </div>
-                <div className="ml-3">
-                  <p
-                    className={cn(
-                      "text-sm font-medium",
-                      toastType === "success"
-                        ? "text-[#179150]"
-                        : "text-red-800 dark:text-red-400"
-                    )}
-                  >
-                    {toastMessage}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <Toast
+        message={toastMessage}
+        type={toastType}
+        isVisible={showToast}
+        onClose={() => setShowToast(false)}
+      />
     </SuperAdminLayout>
   );
 }
